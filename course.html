@@ -1,0 +1,3217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GH-600 Exam Prep — Course</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ── Course Layout ── */
+  .course-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 56px);
+  }
+
+  @media (max-width: 1000px) {
+    .course-layout {
+      grid-template-columns: 1fr;
+    }
+    .course-sidebar {
+      position: relative !important;
+      top: 0 !important;
+      max-height: none !important;
+      border-right: none !important;
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  /* ── Sidebar ── */
+  .course-sidebar {
+    position: sticky;
+    top: 56px;
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 0;
+  }
+
+  .sidebar-progress {
+    padding: 0 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-progress-label span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .sidebar-progress-label strong {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--green);
+  }
+
+  .sidebar-domain {
+    margin-bottom: 0.25rem;
+  }
+
+  .sidebar-domain-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+
+  .sidebar-domain-header:hover {
+    color: var(--text-primary);
+    background: var(--bg-card);
+  }
+
+  .sidebar-domain-header.active {
+    color: var(--green);
+    background: var(--green-glow);
+  }
+
+  .sidebar-domain-header .domain-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sidebar-domain-header .chevron {
+    margin-left: auto;
+    font-size: 0.65rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .sidebar-domain-header.expanded .chevron {
+    transform: rotate(90deg);
+  }
+
+  .sidebar-domain-header .domain-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    font-weight: 700;
+  }
+
+  .sidebar-domain-header .domain-check.done {
+    border-color: var(--green);
+    background: var(--green);
+    color: var(--bg-primary);
+  }
+
+  .sidebar-subsections {
+    display: none;
+    padding: 0.25rem 0 0.5rem 0;
+  }
+
+  .sidebar-subsections.open {
+    display: block;
+  }
+
+  .sidebar-sub-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1.25rem 0.4rem 2.75rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+
+  .sidebar-sub-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-card);
+  }
+
+  .sidebar-sub-item.active {
+    color: var(--green);
+  }
+
+  .sidebar-sub-item .sub-check {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .sidebar-sub-item.completed .sub-check {
+    border-color: var(--green);
+    background: var(--green);
+  }
+
+  /* ── Main Content ── */
+  .course-main {
+    padding: 2rem 2.5rem 4rem;
+    max-width: 900px;
+  }
+
+  @media (max-width: 1000px) {
+    .course-main { padding: 1.5rem; }
+  }
+
+  .course-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .course-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* ── Domain Sections ── */
+  .domain-section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 72px;
+  }
+
+  .domain-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .domain-title h2 {
+    font-size: 1.4rem;
+  }
+
+  .domain-title .domain-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .domain-meta {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  /* ── Subsection ── */
+  .subsection {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 72px;
+  }
+
+  .subsection > h3 {
+    font-size: 1.15rem;
+    color: var(--green);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .subsection > h4 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .subsection p {
+    margin-bottom: 0.75rem;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .subsection ul, .subsection ol {
+    margin: 0.5rem 0 1rem 1.25rem;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .subsection li {
+    margin-bottom: 0.35rem;
+  }
+
+  .subsection li strong {
+    color: var(--text-primary);
+  }
+
+  /* ── Callout Boxes ── */
+  .exam-tip {
+    border-left: 3px solid var(--green);
+    background: var(--green-glow);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.25rem 0;
+  }
+
+  .exam-tip-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--green);
+    margin-bottom: 0.35rem;
+  }
+
+  .exam-tip p, .exam-tip li {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+
+  .warning-box {
+    border-left: 3px solid var(--yellow);
+    background: rgba(255, 204, 0, 0.08);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.25rem 0;
+  }
+
+  .warning-box-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--yellow);
+    margin-bottom: 0.35rem;
+  }
+
+  .danger-box {
+    border-left: 3px solid var(--red);
+    background: rgba(255, 68, 68, 0.08);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.25rem 0;
+  }
+
+  .danger-box-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--red);
+    margin-bottom: 0.35rem;
+  }
+
+  .concept-box {
+    border-left: 3px solid var(--blue);
+    background: rgba(68, 136, 255, 0.08);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.25rem 0;
+  }
+
+  .concept-box-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--blue);
+    margin-bottom: 0.35rem;
+  }
+
+  .concept-box p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+
+  /* ── Code blocks in course ── */
+  .subsection pre {
+    margin: 1rem 0 1.25rem;
+  }
+
+  /* ── Comparison Tables ── */
+  .subsection table {
+    margin: 1rem 0 1.5rem;
+  }
+
+  .subsection th {
+    background: var(--bg-secondary);
+  }
+
+  /* ── Mark Complete Button ── */
+  .mark-complete-wrapper {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mark-complete-wrapper .status-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .mark-complete-wrapper .status-text.done {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .btn-complete {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--green-dim);
+    background: var(--green-glow);
+    color: var(--green);
+    font-family: var(--font-sans);
+    transition: all var(--transition);
+  }
+
+  .btn-complete:hover {
+    background: var(--green);
+    color: var(--bg-primary);
+    box-shadow: 0 0 20px var(--green-glow);
+  }
+
+  .btn-complete.completed {
+    background: var(--green);
+    color: var(--bg-primary);
+    cursor: default;
+  }
+
+  /* ── Diagram boxes ── */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 1rem 0 1.5rem;
+    justify-content: center;
+  }
+
+  .flow-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.6rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .flow-arrow {
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    padding: 0 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .flow-step.highlight {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-glow);
+  }
+
+  /* ── Grid layout for comparisons ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+  }
+
+  @media (max-width: 700px) {
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+
+  .compare-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+
+  .compare-card h5 {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .compare-card p, .compare-card li {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .compare-card ul {
+    margin: 0.25rem 0 0 1rem;
+  }
+
+  /* ── Footer ── */
+  .course-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body class="scanline">
+
+<nav class="top-nav">
+  <a href="index.html" class="logo">GH-600<span> // EXAM PREP</span></a>
+  <div class="nav-links">
+    <a href="index.html">Hub</a>
+    <a href="course.html" class="active">Course</a>
+    <a href="game.html">Game</a>
+    <a href="exam.html">Exams</a>
+  </div>
+</nav>
+
+<div class="course-layout">
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- SIDEBAR                                  -->
+  <!-- ════════════════════════════════════════ -->
+  <aside class="course-sidebar" id="courseSidebar">
+    <div class="sidebar-progress">
+      <div class="sidebar-progress-label">
+        <span>Course Progress</span>
+        <strong id="progressPercent">0%</strong>
+      </div>
+      <div class="progress-bar">
+        <div class="fill" id="progressBar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Domain 1 -->
+    <div class="sidebar-domain">
+      <button class="sidebar-domain-header" data-domain="domain1" aria-expanded="false">
+        <span class="domain-indicator" style="background: var(--green);"></span>
+        <span class="domain-check" id="check-domain1"></span>
+        <span>1. Agent Architecture &amp; SDLC</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="sidebar-subsections" id="subs-domain1">
+        <button class="sidebar-sub-item" data-section="d1s1">
+          <span class="sub-check" id="subcheck-d1s1"></span>
+          1.1 Agents in the SDLC
+        </button>
+        <button class="sidebar-sub-item" data-section="d1s2">
+          <span class="sub-check" id="subcheck-d1s2"></span>
+          1.2 Planning, Reasoning, Action
+        </button>
+        <button class="sidebar-sub-item" data-section="d1s3">
+          <span class="sub-check" id="subcheck-d1s3"></span>
+          1.3 Observability &amp; Control
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain 2 -->
+    <div class="sidebar-domain">
+      <button class="sidebar-domain-header" data-domain="domain2" aria-expanded="false">
+        <span class="domain-indicator" style="background: var(--blue);"></span>
+        <span class="domain-check" id="check-domain2"></span>
+        <span>2. Tool Use &amp; Environment</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="sidebar-subsections" id="subs-domain2">
+        <button class="sidebar-sub-item" data-section="d2s1">
+          <span class="sub-check" id="subcheck-d2s1"></span>
+          2.1 Select &amp; Configure Tools
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s2">
+          <span class="sub-check" id="subcheck-d2s2"></span>
+          2.2 Configure MCP Servers
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s3">
+          <span class="sub-check" id="subcheck-d2s3"></span>
+          2.3 Agent Dev Environments
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s4">
+          <span class="sub-check" id="subcheck-d2s4"></span>
+          2.4 Safe Execution Paths
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s5">
+          <span class="sub-check" id="subcheck-d2s5"></span>
+          2.5 Copilot Agent Mode
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s6">
+          <span class="sub-check" id="subcheck-d2s6"></span>
+          2.6 Copilot Extensions
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s7">
+          <span class="sub-check" id="subcheck-d2s7"></span>
+          2.7 Agent Skills
+        </button>
+        <button class="sidebar-sub-item" data-section="d2s8">
+          <span class="sub-check" id="subcheck-d2s8"></span>
+          2.8 Copilot SDK
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain 3 -->
+    <div class="sidebar-domain">
+      <button class="sidebar-domain-header" data-domain="domain3" aria-expanded="false">
+        <span class="domain-indicator" style="background: var(--purple);"></span>
+        <span class="domain-check" id="check-domain3"></span>
+        <span>3. Memory, State &amp; Execution</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="sidebar-subsections" id="subs-domain3">
+        <button class="sidebar-sub-item" data-section="d3s1">
+          <span class="sub-check" id="subcheck-d3s1"></span>
+          3.1 Agent Memory Strategies
+        </button>
+        <button class="sidebar-sub-item" data-section="d3s2">
+          <span class="sub-check" id="subcheck-d3s2"></span>
+          3.2 Persist State &amp; Context Drift
+        </button>
+        <button class="sidebar-sub-item" data-section="d3s3">
+          <span class="sub-check" id="subcheck-d3s3"></span>
+          3.3 Cross-Tool Continuity
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain 4 -->
+    <div class="sidebar-domain">
+      <button class="sidebar-domain-header" data-domain="domain4" aria-expanded="false">
+        <span class="domain-indicator" style="background: var(--yellow);"></span>
+        <span class="domain-check" id="check-domain4"></span>
+        <span>4. Evaluation &amp; Tuning</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="sidebar-subsections" id="subs-domain4">
+        <button class="sidebar-sub-item" data-section="d4s1">
+          <span class="sub-check" id="subcheck-d4s1"></span>
+          4.1 Success Criteria &amp; Signals
+        </button>
+        <button class="sidebar-sub-item" data-section="d4s2">
+          <span class="sub-check" id="subcheck-d4s2"></span>
+          4.2 Failure &amp; Root Cause Analysis
+        </button>
+        <button class="sidebar-sub-item" data-section="d4s3">
+          <span class="sub-check" id="subcheck-d4s3"></span>
+          4.3 Tune Agent Behavior
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain 5 -->
+    <div class="sidebar-domain">
+      <button class="sidebar-domain-header" data-domain="domain5" aria-expanded="false">
+        <span class="domain-indicator" style="background: var(--orange);"></span>
+        <span class="domain-check" id="check-domain5"></span>
+        <span>5. Multi-Agent Coordination</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="sidebar-subsections" id="subs-domain5">
+        <button class="sidebar-sub-item" data-section="d5s1">
+          <span class="sub-check" id="subcheck-d5s1"></span>
+          5.1 Multi-Agent Workflows
+        </button>
+        <button class="sidebar-sub-item" data-section="d5s2">
+          <span class="sub-check" id="subcheck-d5s2"></span>
+          5.2 Multi-Agent Observability
+        </button>
+        <button class="sidebar-sub-item" data-section="d5s3">
+          <span class="sub-check" id="subcheck-d5s3"></span>
+          5.3 Multi-Agent Failures
+        </button>
+        <button class="sidebar-sub-item" data-section="d5s4">
+          <span class="sub-check" id="subcheck-d5s4"></span>
+          5.4 Agent Lifecycle Management
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain 6 -->
+    <div class="sidebar-domain">
+      <button class="sidebar-domain-header" data-domain="domain6" aria-expanded="false">
+        <span class="domain-indicator" style="background: var(--red);"></span>
+        <span class="domain-check" id="check-domain6"></span>
+        <span>6. Guardrails &amp; Accountability</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="sidebar-subsections" id="subs-domain6">
+        <button class="sidebar-sub-item" data-section="d6s1">
+          <span class="sub-check" id="subcheck-d6s1"></span>
+          6.1 Define Autonomy Levels
+        </button>
+        <button class="sidebar-sub-item" data-section="d6s2">
+          <span class="sub-check" id="subcheck-d6s2"></span>
+          6.2 Guardrails &amp; HITL
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- MAIN CONTENT                             -->
+  <!-- ════════════════════════════════════════ -->
+  <main class="course-main" id="courseMain">
+
+    <div class="course-header">
+      <h1>GH-600 <span class="text-green">Study Guide</span></h1>
+      <p>Complete walkthrough of all 6 exam domains. Work through each section, then mark it complete to track your progress.</p>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- DOMAIN 1: Prepare Agent Architecture & SDLC Processes (15-20%)     -->
+    <!-- ================================================================== -->
+    <section class="domain-section" id="domain1">
+      <div class="domain-title">
+        <span class="domain-badge badge-green">15-20%</span>
+        <h2>Domain 1: Prepare Agent Architecture &amp; SDLC Processes</h2>
+      </div>
+      <p class="domain-meta">3 subtopics &mdash; Understand what makes software agents "agentic," how they integrate into the software development lifecycle, and how to configure observability and control over their autonomous behavior.</p>
+
+      <!-- ── 1.1 ── -->
+      <div class="subsection" id="d1s1">
+        <h3>1.1 Integrate Agents into the SDLC</h3>
+
+        <h4>What Makes an AI System "Agentic" vs. "Assistant"</h4>
+        <p>The exam draws a clear line between an <strong>assistant</strong> and an <strong>agent</strong>. An assistant responds to a single prompt — you ask it to write a function, it writes a function, and it's done. An agent is fundamentally different: it maintains <strong>goals across multiple steps</strong>, decides which actions to take, uses tools to interact with external systems, creates <strong>durable artifacts</strong> (branches, commits, pull requests, files), and iterates on feedback from those actions.</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <h5>Assistant (Non-Agentic)</h5>
+            <ul>
+              <li>Single prompt &rarr; single response</li>
+              <li>Suggests code, does not execute it</li>
+              <li>No tool use beyond generation</li>
+              <li>No persistent state between turns</li>
+              <li>User manually applies suggestions</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h5>Agent (Agentic)</h5>
+            <ul>
+              <li>Maintains goals across many steps</li>
+              <li>Decides <em>which</em> actions to take next</li>
+              <li>Uses tools: file I/O, GitHub API, shell, MCP</li>
+              <li>Creates durable artifacts (branches, PRs)</li>
+              <li>Iterates based on feedback (CI, reviews)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The defining characteristic of an <strong>agentic</strong> system is its ability to <strong>autonomously decide and execute multi-step actions</strong> toward a goal, creating lasting changes in the codebase. If it only suggests — it's an assistant. If it acts — it's an agent.</p>
+        </div>
+
+        <h4>Steps Agents Can Perform in the SDLC</h4>
+        <p>Agents can participate in nearly every phase of the software development lifecycle. The exam expects you to know which phases are well-suited for agent automation and which require human oversight:</p>
+        <ul>
+          <li><strong>Code generation:</strong> Creating new files, writing functions, scaffolding entire features from issue descriptions. The agent reads the issue, plans the implementation, writes code, and pushes it to a feature branch.</li>
+          <li><strong>Code review:</strong> An agent can review PRs for style consistency, potential bugs, missing tests, or security issues. It leaves inline comments just like a human reviewer.</li>
+          <li><strong>Testing:</strong> Generating unit tests, integration tests, running test suites, and reporting results. Agents can identify untested code paths and write tests to cover them.</li>
+          <li><strong>Dependency updates:</strong> Scanning for outdated dependencies, creating PRs with version bumps, running tests to verify compatibility (similar to what Dependabot does, but with agentic reasoning about breaking changes).</li>
+          <li><strong>Deployment:</strong> Triggering deployment pipelines, monitoring rollout health, performing rollbacks if metrics degrade.</li>
+          <li><strong>Documentation:</strong> Generating or updating docs based on code changes, keeping READMEs in sync, writing changelog entries.</li>
+        </ul>
+
+        <h4>Common Anti-Patterns</h4>
+        <p>The exam tests your ability to identify when agent usage goes wrong. Memorize these anti-patterns:</p>
+
+        <table>
+          <thead>
+            <tr><th>Anti-Pattern</th><th>Description</th><th>Mitigation</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Over-autonomy</strong></td>
+              <td>Agent acts without any human review gates — merges PRs, deploys to production without checks.</td>
+              <td>Required approvals, branch protection, status checks before merge.</td>
+            </tr>
+            <tr>
+              <td><strong>Context pollution</strong></td>
+              <td>Stale or conflicting context accumulates, causing the agent to make decisions based on outdated information.</td>
+              <td>Context pruning, freshness checks, re-reading current state before acting.</td>
+            </tr>
+            <tr>
+              <td><strong>Goal drift</strong></td>
+              <td>Agent gradually diverges from the original task — starts fixing "one more thing," refactoring unrelated code.</td>
+              <td>Scoped task definitions, explicit success criteria, boundary enforcement.</td>
+            </tr>
+            <tr>
+              <td><strong>Missing traceability</strong></td>
+              <td>No audit trail of what the agent did or why — commits lack context, no PR descriptions, no linked issues.</td>
+              <td>Require meaningful commit messages, PR descriptions, issue linking.</td>
+            </tr>
+            <tr>
+              <td><strong>Scope creep</strong></td>
+              <td>Agent exceeds the boundaries of its assigned task — modifies files outside its scope, changes configuration it shouldn't touch.</td>
+              <td>File/directory scoping, CODEOWNERS, restricted tool permissions.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Anti-Pattern Warning</div>
+          <p><strong>Over-autonomy</strong> and <strong>missing traceability</strong> are the two most dangerous anti-patterns in production. Every agent action should be traceable to a commit, PR, or workflow run. Every high-impact action should have a human review gate.</p>
+        </div>
+
+        <h4>Defining Inputs, Outputs, and Success Criteria</h4>
+        <p>A well-configured agent has clearly defined boundaries for each task:</p>
+        <ul>
+          <li><strong>Inputs:</strong> The issue description, requirements documents, context files (like <code>copilot-instructions.md</code>), existing code for reference, test fixtures, environment configuration.</li>
+          <li><strong>Outputs:</strong> Feature branches, pull requests, code changes, test files, documentation updates, SARIF scan results, deployment artifacts.</li>
+          <li><strong>Success criteria:</strong> All tests pass, no new security vulnerabilities (clean CodeQL/secret scanning), code review approved, performance benchmarks met, coverage thresholds maintained. These should be defined <em>before</em> the agent starts work.</li>
+        </ul>
+
+        <pre><code># Example: Well-defined agent task specification
+Task: Implement user authentication endpoint
+Inputs:
+  - Issue #142 (requirements)
+  - /src/api/ (existing API patterns)
+  - /tests/api/ (test patterns)
+Outputs:
+  - Branch: feature/auth-endpoint
+  - PR with description and linked issue
+  - Source files in /src/api/auth/
+  - Tests in /tests/api/auth/
+Success Criteria:
+  - All existing tests still pass
+  - New endpoint has >= 80% test coverage
+  - CodeQL scan: zero new alerts
+  - Secret scanning: clean
+  - PR approved by CODEOWNERS</code></pre>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d1s1">Mark as Complete</button>
+          <span class="status-text" id="status-d1s1"></span>
+        </div>
+      </div>
+
+      <!-- ── 1.2 ── -->
+      <div class="subsection" id="d1s2">
+        <h3>1.2 Define Boundaries Between Planning, Reasoning, and Action</h3>
+
+        <h4>The Plan &rarr; Act &rarr; Evaluate Lifecycle Loop</h4>
+        <p>Agentic workflows are <strong>not linear</strong>. They follow a cyclical loop:</p>
+
+        <div class="flow-diagram">
+          <div class="flow-step highlight">Plan</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step">Act</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step">Evaluate</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step highlight">Plan</div>
+          <span class="flow-arrow">...</span>
+        </div>
+
+        <p>The agent plans what to do, acts (writes code, creates a PR), evaluates (reads CI results, review feedback), and then plans again based on that evaluation. This cycle continues until the task meets its success criteria or the agent escalates to a human.</p>
+
+        <h4>Planning Artifacts</h4>
+        <p>When an agent plans, it should produce <strong>inspectable planning artifacts</strong> that humans can review:</p>
+        <ul>
+          <li><strong>Structured plans in PR descriptions:</strong> A checklist of what the agent intends to do, with scope, success criteria, and rollback paths.</li>
+          <li><strong>Linked issues:</strong> The plan references the issue(s) it's addressing, maintaining traceability.</li>
+          <li><strong>Checklists with scope/success criteria/rollback paths:</strong> Explicitly stating what's in-scope, what done looks like, and what to do if things go wrong.</li>
+        </ul>
+
+        <pre><code>## Agent Plan — PR #347
+
+### Scope
+- Add rate limiting middleware to /api/v2/* endpoints
+- Update existing tests to cover rate limit responses
+
+### Success Criteria
+- [ ] Rate limit returns 429 with Retry-After header
+- [ ] Existing API tests pass
+- [ ] New rate limit tests have > 90% branch coverage
+- [ ] CodeQL scan clean
+
+### Rollback Path
+- Revert this PR (no database migrations involved)
+- Rate limiting config is env-var driven, can be disabled via RATE_LIMIT_ENABLED=false</code></pre>
+
+        <h4>Acting: What Agents Do</h4>
+        <p>The "Act" phase involves the agent making <strong>durable changes</strong>:</p>
+        <ul>
+          <li>Creating branches (<code>git checkout -b feature/rate-limit</code>)</li>
+          <li>Changing files (writing, editing, deleting source code)</li>
+          <li>Pushing commits (with meaningful commit messages)</li>
+          <li>Opening or updating pull requests</li>
+          <li>Responding to review feedback (addressing comments, pushing fixes)</li>
+        </ul>
+
+        <h4>Evaluating: How Agents Learn From Results</h4>
+        <p>After acting, the agent evaluates by reading signals from the development environment:</p>
+        <ul>
+          <li><strong>Workflow runs:</strong> Did the CI pipeline pass? Which tests failed?</li>
+          <li><strong>Status checks:</strong> Are all required checks green?</li>
+          <li><strong>Code review feedback:</strong> What did reviewers say? Are there requested changes?</li>
+          <li><strong>Security signals:</strong> Code scanning results (CodeQL), secret scanning alerts, dependency vulnerability alerts (Dependabot), SARIF uploads from third-party tools.</li>
+        </ul>
+
+        <div class="concept-box">
+          <div class="concept-box-title">Key Exam Concept</div>
+          <p><strong>SARIF (Static Analysis Results Interchange Format)</strong> is the standard format for reporting static analysis results to GitHub. When an agent runs a scanner (CodeQL or any third-party tool), the results are uploaded as SARIF files to GitHub's code scanning API. The agent then reads these results as evaluation signals.</p>
+        </div>
+
+        <h4>Option A: Plan-First PR vs. Option B: Plan + Execution in Same PR</h4>
+        <div class="compare-grid">
+          <div class="compare-card">
+            <h5>Option A: Plan-First PR</h5>
+            <p>The agent opens a PR with <strong>only a plan</strong> — no code changes. A human reviews and approves the plan. Only after approval does the agent implement.</p>
+            <ul>
+              <li>Best for <strong>high-risk work</strong> (schema changes, security-sensitive code, infrastructure)</li>
+              <li>Adds latency — waiting for plan approval</li>
+              <li>Maximum safety and alignment</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h5>Option B: Plan + Execution in Same PR</h5>
+            <p>The agent includes both the plan (in the PR description) and the implementation (in the code changes) in a single PR.</p>
+            <ul>
+              <li>Best for <strong>low-risk, fast iteration</strong> (bug fixes, dependency bumps, documentation)</li>
+              <li>Faster turnaround</li>
+              <li>Reviewer evaluates plan and code together</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4>Enforcing Planning Boundaries</h4>
+        <p>How do you prevent an agent from skipping the planning phase and jumping straight to code?</p>
+        <ul>
+          <li><strong>Read-only planning agents:</strong> A dedicated agent with only read access to the repository. It can analyze the issue and produce a plan, but it physically cannot write code. A separate agent with write access implements the plan.</li>
+          <li><strong>Explicit handoff to implementation agents:</strong> The planning agent produces a structured plan and creates an issue or updates a PR description. A different agent (or the same agent in a different mode) picks it up for implementation.</li>
+          <li><strong>Tool gating in orchestrators:</strong> The orchestration layer only grants write tools (file editing, git push) after a planning phase is complete and reviewed.</li>
+          <li><strong>"Plan mode" workflows:</strong> The agent is configured via <code>copilot-instructions.md</code> to always output a plan first and wait for approval before proceeding.</li>
+        </ul>
+
+        <h4>Configuring Agent Planning Behavior</h4>
+        <p>You configure how Copilot and other agents handle planning through instruction files:</p>
+
+        <pre><code># .github/copilot-instructions.md
+
+## Planning Requirements
+- Before writing any code, output a structured plan as a PR comment
+- Include: scope, files to modify, success criteria, rollback path
+- Wait for a human to approve the plan by commenting "approved"
+- If the plan is rejected, revise based on feedback and resubmit
+- Never skip the planning phase for changes touching /src/core/ or /infrastructure/</code></pre>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The file <code>.github/copilot-instructions.md</code> is the <strong>repo-level configuration</strong> for GitHub Copilot agent behavior. It's the primary mechanism for controlling how the agent plans, acts, and self-constrains. Expect questions about what belongs in this file.</p>
+        </div>
+
+        <h4>Validating Agent Plans Before Execution</h4>
+        <p>Validation can happen through multiple mechanisms:</p>
+        <ul>
+          <li><strong>Human review:</strong> A required approval on the plan before the agent proceeds.</li>
+          <li><strong>Automated checks:</strong> A workflow that validates the plan structure (does it include rollback paths? does it specify success criteria?).</li>
+          <li><strong>Scope validation:</strong> Ensuring the plan doesn't touch files outside its designated scope.</li>
+          <li><strong>Risk assessment:</strong> Automated classification of the plan's risk level, routing high-risk plans for additional review.</li>
+        </ul>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d1s2">Mark as Complete</button>
+          <span class="status-text" id="status-d1s2"></span>
+        </div>
+      </div>
+
+      <!-- ── 1.3 ── -->
+      <div class="subsection" id="d1s3">
+        <h3>1.3 Configure Observability and Control for Autonomous Agents</h3>
+
+        <h4>Autonomy Levels</h4>
+        <p>The exam defines a spectrum of autonomy. You need to match the right autonomy level to the situation. These map directly to GitHub Copilot's interaction modes:</p>
+
+        <table>
+          <thead>
+            <tr><th>Level</th><th>Copilot Mode</th><th>Description</th><th>When to Use</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Fully autonomous</strong></td>
+              <td>Agent + auto-merge</td>
+              <td>Agent acts, merges, deploys without any human interaction.</td>
+              <td>Only for extremely low-risk, well-tested, reversible operations (e.g., auto-fixing lint errors).</td>
+            </tr>
+            <tr>
+              <td><strong>Supervised autonomous</strong></td>
+              <td>Agent mode (standard)</td>
+              <td>Agent acts autonomously but a human reviews output before merge/deploy.</td>
+              <td>Standard development tasks — feature PRs, bug fixes, dependency updates. <strong>Most common level.</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Human-in-the-loop</strong></td>
+              <td>Agent mode with approval gates</td>
+              <td>Agent proposes, human approves at key decision points during execution.</td>
+              <td>Higher-risk tasks — schema changes, infrastructure modifications, security-related code.</td>
+            </tr>
+            <tr>
+              <td><strong>Human-led</strong></td>
+              <td>Ask mode</td>
+              <td>Human drives the process; agent assists with specific sub-tasks on request.</td>
+              <td>Novel, unprecedented, or compliance-critical work where the agent lacks sufficient context.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Inspectable Artifacts</h4>
+        <p>For any level of autonomy, you need to be able to inspect what the agent did. The exam expects you to know these inspectable artifacts:</p>
+        <ul>
+          <li><strong>Agent plans in PR descriptions:</strong> The plan the agent generated, visible to all reviewers.</li>
+          <li><strong>Commit messages:</strong> Each commit should explain <em>what</em> was changed and <em>why</em>, providing a decision trail.</li>
+          <li><strong>Workflow logs:</strong> GitHub Actions logs showing every step the agent executed, including tool calls and their results.</li>
+          <li><strong>SARIF reports:</strong> Structured security scan results uploaded to the repo's code scanning dashboard.</li>
+        </ul>
+
+        <h4>Human Intervention Points</h4>
+        <p>GitHub provides several built-in mechanisms for requiring human intervention:</p>
+        <ul>
+          <li><strong>PR reviews:</strong> Require one or more approvals before a PR can be merged. This is the most common intervention point for agent-generated code.</li>
+          <li><strong>Required approvals:</strong> Configurable number of approving reviews needed.</li>
+          <li><strong>CODEOWNERS:</strong> Specific files or directories require review from designated owners. If an agent modifies <code>/src/auth/</code>, the security team automatically gets tagged.</li>
+          <li><strong>Branch protection rules:</strong> Enforce status checks, require approvals, prevent force pushes, restrict who can push to the branch.</li>
+          <li><strong>Rulesets:</strong> GitHub's newer, more flexible system for branch/tag policies. Can be layered and applied at org level.</li>
+        </ul>
+
+        <pre><code># CODEOWNERS file example
+# These owners will be required reviewers for agent-generated changes
+
+/src/auth/          @security-team
+/infrastructure/    @platform-team @security-team
+/src/api/billing/   @billing-team
+*.sql               @database-team
+Dockerfile          @platform-team</code></pre>
+
+        <h4>Balancing Speed vs. Safety</h4>
+        <p>The exam tests a nuanced understanding: not every action needs the same level of oversight. The goal is to <strong>minimize approvals that don't materially reduce risk</strong>.</p>
+        <ul>
+          <li>Auto-approve documentation-only PRs (low risk, easily reversible).</li>
+          <li>Require one approval for standard feature PRs.</li>
+          <li>Require multiple approvals for security-sensitive or infrastructure changes.</li>
+          <li>Use CODEOWNERS to route reviews to the right people, not just any people.</li>
+          <li>Fast-track changes that have clean CI, clean scans, and only touch well-tested areas.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The exam asks you to <strong>right-size human intervention</strong>. Over-approving wastes time and creates bottlenecks. Under-approving introduces risk. The right answer usually involves classifying changes by risk level and applying proportional oversight — CODEOWNERS for sensitive areas, required checks for everything, manual approval only where it adds real value.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d1s3">Mark as Complete</button>
+          <span class="status-text" id="status-d1s3"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DOMAIN 2: Implement Tool Use & Environment Interaction (20-25%)    -->
+    <!-- ================================================================== -->
+    <section class="domain-section" id="domain2">
+      <div class="domain-title">
+        <span class="domain-badge badge-blue">20-25%</span>
+        <h2>Domain 2: Implement Tool Use &amp; Environment Interaction</h2>
+      </div>
+      <p class="domain-meta">8 subtopics &mdash; The heaviest domain on the exam. Covers selecting and configuring tools, MCP servers and registries, integrating agents into development environments, safe execution patterns, Copilot agent mode, extensions, agent skills, and the Copilot SDK.</p>
+
+      <!-- ── 2.1 ── -->
+      <div class="subsection" id="d2s1">
+        <h3>2.1 Select and Configure Agent Tools</h3>
+
+        <h4>Types of Tools</h4>
+        <p>Agents interact with the world through tools. The exam categorizes tools into several types:</p>
+
+        <table>
+          <thead>
+            <tr><th>Tool Type</th><th>Description</th><th>Examples</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>GitHub API</strong></td>
+              <td>REST and GraphQL APIs for interacting with repos, issues, PRs, checks, releases.</td>
+              <td>Create a PR, list issues, update a check run, read file contents, post a review comment.</td>
+            </tr>
+            <tr>
+              <td><strong>File system</strong></td>
+              <td>Read, write, create, delete files in the working directory or repository checkout.</td>
+              <td>Read <code>package.json</code>, write new source files, edit configuration.</td>
+            </tr>
+            <tr>
+              <td><strong>Shell/Terminal</strong></td>
+              <td>Execute commands in a shell environment — build tools, test runners, linters.</td>
+              <td><code>npm test</code>, <code>docker build</code>, <code>eslint .</code>, <code>git diff</code></td>
+            </tr>
+            <tr>
+              <td><strong>External APIs</strong></td>
+              <td>Third-party services the agent calls via HTTP — monitoring, notification, deployment.</td>
+              <td>Slack notifications, PagerDuty alerts, cloud provider APIs.</td>
+            </tr>
+            <tr>
+              <td><strong>MCP servers</strong></td>
+              <td>Model Context Protocol servers that expose tools in a standardized format (covered in detail in 2.2).</td>
+              <td>GitHub MCP server, custom database MCP server, Jira MCP server.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Tool Identification: Matching Tools to Task Requirements</h4>
+        <p>When configuring an agent for a task, you select tools based on what the task requires:</p>
+        <ul>
+          <li><strong>Need to read issue descriptions?</strong> &rarr; GitHub API (issues endpoint)</li>
+          <li><strong>Need to modify source code?</strong> &rarr; File system tools</li>
+          <li><strong>Need to run tests?</strong> &rarr; Shell/terminal tools</li>
+          <li><strong>Need to create a PR?</strong> &rarr; GitHub API (pulls endpoint)</li>
+          <li><strong>Need to query a database?</strong> &rarr; MCP server or external API</li>
+          <li><strong>Need to send a notification?</strong> &rarr; External API (Slack, Teams, email)</li>
+        </ul>
+
+        <h4>Tool Configuration in copilot-instructions.md</h4>
+        <p>You define what tools an agent should use and how via configuration files:</p>
+
+        <pre><code># .github/copilot-instructions.md
+
+## Available Tools
+- Use the GitHub API for all PR and issue operations
+- Use the file system to read and write source code
+- Use the shell to run `npm test` and `npm run lint`
+- Do NOT use shell commands to directly call `git` — use the GitHub API instead
+
+## Tool Constraints
+- Never execute `rm -rf` or any destructive shell commands
+- Only read files within /src/ and /tests/ directories
+- Do not modify files in /config/ or /.github/workflows/ without explicit approval
+- API calls should use the minimum required scope (read-only when possible)</code></pre>
+
+        <h4>Tool Permissions: Read-Only vs. Read-Write</h4>
+        <p>A core principle is <strong>least privilege</strong>. An agent should have the minimum permissions needed for its task:</p>
+        <ul>
+          <li><strong>Read-only:</strong> Appropriate for analysis agents (code review, security scanning, report generation). The agent can read files, issues, and PRs but cannot create or modify them.</li>
+          <li><strong>Read-write:</strong> Necessary for implementation agents that need to create branches, push code, and open PRs. Should still be scoped to specific repos and branches.</li>
+          <li><strong>Branch-scoped:</strong> Agent can only write to feature branches, never to <code>main</code> or protected branches.</li>
+          <li><strong>Directory-scoped:</strong> Agent is restricted to specific directories within the repo.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p><strong>Least privilege for agent tools</strong> means: give read-only access by default, escalate to read-write only for the specific resources the task requires, and scope write access to the narrowest possible boundary (specific branch, specific directory). This principle applies to GitHub API tokens, file system access, and shell permissions.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s1">Mark as Complete</button>
+          <span class="status-text" id="status-d2s1"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.2 ── -->
+      <div class="subsection" id="d2s2">
+        <h3>2.2 Configure MCP Servers</h3>
+
+        <h4>What Is MCP (Model Context Protocol)?</h4>
+        <p>MCP is a <strong>standard protocol</strong> for connecting AI clients (like GitHub Copilot) to external tools and services. Think of it as a universal adapter: instead of each AI tool having custom integrations for each service, MCP provides a standardized way for clients to discover, invoke, and get results from tools.</p>
+
+        <div class="concept-box">
+          <div class="concept-box-title">Key Exam Concept</div>
+          <p><strong>Model Context Protocol (MCP)</strong> sits between the AI client and the underlying system. The client doesn't need to know the implementation details of the tool — it just calls the MCP server's standardized interface. This is similar to how a REST API abstracts away a database, except MCP is specifically designed for AI tool use.</p>
+        </div>
+
+        <h4>MCP Server Architecture</h4>
+        <p>An MCP server sits between the AI client and the underlying system it exposes:</p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">AI Client (Copilot)</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step highlight">MCP Server</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step">Underlying System (GitHub, DB, etc.)</div>
+        </div>
+
+        <p>The MCP server exposes tools in a structured format that the AI client can understand — it provides tool names, descriptions, parameter schemas, and return types. The client can discover available tools, call them with parameters, and receive structured results.</p>
+
+        <h4>MCP Transports: stdio vs. HTTP</h4>
+        <p>MCP supports <strong>two transport types</strong>. Knowing the difference is critical for the exam:</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <h5>stdio Transport (Local Servers)</h5>
+            <ul>
+              <li>The client <strong>spawns the MCP server as a subprocess</strong></li>
+              <li>Communication via stdin/stdout (no network involved)</li>
+              <li>Most common transport for <strong>local MCP servers</strong></li>
+              <li>Server runs as long as the client runs, exits when client exits</li>
+              <li>Config specifies a <code>command</code> and optional <code>args</code></li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h5>HTTP Transport (Remote Servers)</h5>
+            <ul>
+              <li>Server runs independently, client connects via <strong>HTTP/HTTPS URL</strong></li>
+              <li>Used for <strong>remote/hosted MCP servers</strong> (like GitHub's)</li>
+              <li>Server persists independently of the client</li>
+              <li>Supports authentication (OAuth, tokens)</li>
+              <li>Config specifies a <code>url</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Important for the Exam</div>
+          <p><strong>stdio is NOT the same as "local HTTP."</strong> A local MCP server using stdio is spawned as a child process and communicates via stdin/stdout — there is no HTTP involved, no localhost URL, no port. HTTP transport is for remote servers accessed over the network. The exam may test whether you know that local servers typically use stdio, not HTTP.</p>
+        </div>
+
+        <h4>Local vs. Remote MCP Servers</h4>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <h5>Local MCP Server</h5>
+            <ul>
+              <li>Runs on developer's machine</li>
+              <li>Access to local resources (files, databases, local services)</li>
+              <li>Custom setup per developer</li>
+              <li>Good for local-only tools or development-specific integrations</li>
+              <li>Transport: typically <strong>stdio</strong> (spawned as subprocess)</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h5>Remote MCP Server</h5>
+            <ul>
+              <li>Hosted service, accessible over the network</li>
+              <li>Less setup per developer — consistent across the team</li>
+              <li>Centrally managed permissions and updates</li>
+              <li>GitHub MCP server is remote: <code>https://api.githubcopilot.com/mcp/</code></li>
+              <li>Transport: <strong>HTTP</strong> (connects via URL)</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4>The GitHub MCP Server</h4>
+        <p>GitHub provides an official MCP server that connects Copilot to repos, issues, PRs, and more. This is the most important MCP server for the exam:</p>
+        <ul>
+          <li><strong>URL:</strong> <code>https://api.githubcopilot.com/mcp/</code></li>
+          <li>Provides tools for reading/writing repo contents, managing issues, creating PRs, checking workflow status.</li>
+          <li><strong>Remote is recommended</strong> — avoids local setup, consistent credentials, managed by GitHub.</li>
+        </ul>
+
+        <h4>Adding a Remote MCP Server in VS Code</h4>
+        <p>The exam tests the exact steps to add an MCP server. Here's the procedure for a remote server (like GitHub's):</p>
+        <ol>
+          <li>Open <strong>Copilot Chat</strong> in VS Code</li>
+          <li>Switch to <strong>Agent mode</strong></li>
+          <li>Click the <strong>Tools</strong> button (wrench icon)</li>
+          <li>Select <strong>Configure tools</strong></li>
+          <li>Click <strong>Add MCP server</strong></li>
+          <li>Select <strong>HTTP</strong> as the transport type</li>
+          <li>Enter the URL: <code>https://api.githubcopilot.com/mcp/</code></li>
+          <li><strong>Authenticate</strong> when prompted (GitHub OAuth flow)</li>
+        </ol>
+
+        <p>This adds a configuration to your VS Code settings:</p>
+
+        <pre><code>// .vscode/settings.json — Remote MCP server (HTTP transport)
+{
+  "mcp": {
+    "servers": {
+      "github": {
+        "type": "http",
+        "url": "https://api.githubcopilot.com/mcp/"
+      }
+    }
+  }
+}</code></pre>
+
+        <h4>Adding a Local MCP Server (stdio)</h4>
+        <p>Local MCP servers typically use the <strong>stdio transport</strong>. The client spawns the server as a subprocess and communicates via stdin/stdout. No port or URL is involved:</p>
+
+        <pre><code>// .vscode/settings.json — Local MCP server (stdio transport)
+{
+  "mcp": {
+    "servers": {
+      "my-local-tool": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "@my-org/mcp-server-mydb"]
+      }
+    }
+  }
+}
+
+// Another example — a Python-based local MCP server
+{
+  "mcp": {
+    "servers": {
+      "my-python-tool": {
+        "type": "stdio",
+        "command": "python",
+        "args": ["-m", "my_mcp_server"],
+        "env": {
+          "DATABASE_URL": "postgres://localhost:5432/mydb"
+        }
+      }
+    }
+  }
+}</code></pre>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>MCP uses <strong>two transports</strong>: <strong>stdio</strong> for local servers (spawned as subprocesses, configured with <code>command</code> + <code>args</code>) and <strong>HTTP</strong> for remote servers (configured with a <code>url</code>). The GitHub MCP server is remote (HTTP). Most community/local MCP servers use stdio. Know both configuration formats.</p>
+        </div>
+
+        <h4>MCP Registries</h4>
+        <p>An MCP registry is a <strong>central catalog of MCP servers</strong> for discovery and standardization. It allows organizations to control which MCP servers are available to their developers.</p>
+        <ul>
+          <li><strong>Default registry:</strong> The GitHub MCP Registry — the built-in catalog.</li>
+          <li><strong>Custom registries:</strong> Organizations can run their own registries. Requirements:
+            <ul>
+              <li>Must follow the <strong>MCP Registry v0.1 spec</strong>.</li>
+              <li>Must expose HTTPS endpoints (e.g., <code>GET /v0.1/servers</code> to list available servers).</li>
+              <li>Must include proper CORS headers for browser-based tools to discover servers.</li>
+            </ul>
+          </li>
+          <li><strong>Self-hosting options:</strong> Fork and self-host the open-source MCP Registry, run via Docker, or build a custom implementation.</li>
+          <li><strong>Azure API Center</strong> can act as a managed MCP registry for organizations using Azure.</li>
+        </ul>
+
+        <h4>MCP Allow Lists</h4>
+        <p>Organizations and enterprises can control which MCP servers are permitted through <strong>allow lists</strong>. This is a policy control:</p>
+
+        <table>
+          <thead>
+            <tr><th>Policy Level</th><th>Behavior</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Allow all</strong></td>
+              <td>No restrictions. Any MCP server (local or remote) can be used.</td>
+            </tr>
+            <tr>
+              <td><strong>Registry only</strong></td>
+              <td>Only MCP servers listed in the configured registry are permitted. Even local servers must be registered.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>Configuration steps for organization MCP policy:</p>
+        <ol>
+          <li>Go to <strong>Enterprise settings</strong> (or Organization settings)</li>
+          <li>Navigate to <strong>AI controls</strong> (under Policies or Settings)</li>
+          <li>Find the <strong>MCP</strong> section</li>
+          <li>Click <strong>Enable</strong></li>
+          <li>Set the <strong>registry URL</strong> (or use the default GitHub registry)</li>
+          <li>Choose the <strong>restriction level</strong>: "Allow all" or "Registry only"</li>
+        </ol>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Important for the Exam</div>
+          <p>When "Registry only" is enabled, even <strong>local MCP servers</strong> must be listed in the configured registry. This catches many people — they assume local servers bypass the policy, but they don't. The policy is enforced at the client level.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s2">Mark as Complete</button>
+          <span class="status-text" id="status-d2s2"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.3 ── -->
+      <div class="subsection" id="d2s3">
+        <h3>2.3 Integrate Agents Within Development Environments</h3>
+
+        <h4>Execution Context Evaluation</h4>
+        <p>Before deploying an agent, you need to evaluate its <strong>execution context</strong> — what it can see and do. The context determines the agent's capabilities and limitations:</p>
+        <ul>
+          <li><strong>What files/repos can it access?</strong> Scoped to a single repo, multiple repos, or entire org?</li>
+          <li><strong>What APIs can it call?</strong> GitHub API, external services, internal tools?</li>
+          <li><strong>What environment variables are available?</strong> Secrets, configuration, feature flags?</li>
+          <li><strong>What network access does it have?</strong> Can it reach external services, databases, internal systems?</li>
+        </ul>
+
+        <h4>Repository-Scoped Agents</h4>
+        <p>A common pattern is to scope an agent to a <strong>single repository</strong>. This limits its context and capabilities:</p>
+        <ul>
+          <li>Agent can only read/write files in that repo.</li>
+          <li>Agent can only interact with issues and PRs in that repo.</li>
+          <li>Configuration is stored in the repo's <code>.github/copilot-instructions.md</code>.</li>
+          <li>Prevents cross-repo contamination (agent modifying unrelated code).</li>
+        </ul>
+
+        <h4>CI Workflow Agents (GitHub Actions as Orchestration)</h4>
+        <p>Agents can be triggered and orchestrated through GitHub Actions workflows. This is a major exam topic — using workflows to invoke agents on specific events:</p>
+
+        <pre><code># .github/workflows/agent-pr-review.yml
+name: Agent PR Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run agent review
+        uses: my-org/copilot-review-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            Review this PR for:
+            - Security vulnerabilities
+            - Missing test coverage
+            - Code style violations
+            Post findings as PR review comments.</code></pre>
+
+        <p>Common trigger events for agent workflows:</p>
+        <ul>
+          <li><code>workflow_dispatch</code> — Manual trigger (human kicks off the agent).</li>
+          <li><code>issues</code> — Triggered when an issue is opened, labeled, assigned (agent starts working on assigned issues).</li>
+          <li><code>pull_request</code> — Triggered on PR events (agent reviews, runs checks, responds to feedback).</li>
+          <li><code>schedule</code> — Cron-based (agent runs periodic maintenance — dependency updates, stale issue cleanup).</li>
+        </ul>
+
+        <h4>Branch-Based Scope</h4>
+        <p>A critical safety principle: agents should <strong>never operate directly on main/default branch</strong>. Always on feature branches:</p>
+        <ul>
+          <li>Agent creates a feature branch from the default branch.</li>
+          <li>All changes happen on the feature branch.</li>
+          <li>Changes only reach the default branch through a reviewed, approved PR.</li>
+          <li>This gives humans a review gate before any agent code enters production.</li>
+        </ul>
+
+        <h4>Autonomous Actions</h4>
+        <p>What agents do autonomously within their scoped environment:</p>
+        <ul>
+          <li>Creating branches from the default branch.</li>
+          <li>Committing code changes to feature branches.</li>
+          <li>Opening pull requests with structured descriptions.</li>
+          <li>Responding to review comments with code fixes.</li>
+          <li>Updating PRs based on CI failures (fix failing tests, re-push).</li>
+        </ul>
+
+        <h4>Environment-Specific Constraints</h4>
+        <p>Agents may have different configurations depending on the environment:</p>
+        <ul>
+          <li><strong>Development:</strong> Broader access, more tools available, faster iteration.</li>
+          <li><strong>Staging:</strong> Restricted to read-only for production data, deployment gated.</li>
+          <li><strong>Production:</strong> Highly restricted — typically no direct agent access, changes only via deployed and reviewed code.</li>
+        </ul>
+
+        <h4>Copilot Cloud Agent Firewall Customization</h4>
+        <p>The Copilot cloud agent runs in GitHub's infrastructure. You can customize its network access:</p>
+        <ul>
+          <li>Control which external URLs the agent can reach.</li>
+          <li>Block access to internal systems that shouldn't be reachable from the cloud agent.</li>
+          <li>Allow specific API endpoints needed for the agent's tasks.</li>
+          <li>Configured at the organization or enterprise level.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p><strong>Copilot cloud agent</strong> is GitHub's hosted execution environment for agents. Unlike the local Copilot agent mode in your IDE, the cloud agent runs on GitHub's servers. It has its own firewall rules, network policies, and execution constraints. You configure its access at the org/enterprise level, not per-developer.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s3">Mark as Complete</button>
+          <span class="status-text" id="status-d2s3"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.4 ── -->
+      <div class="subsection" id="d2s4">
+        <h3>2.4 Operate Agents with Safe Execution Paths</h3>
+
+        <h4>Error Handling</h4>
+        <p>Agents encounter errors. The exam tests how well-designed agents handle failures gracefully:</p>
+        <ul>
+          <li><strong>Try/catch patterns:</strong> Wrap tool calls in error handling. If a GitHub API call fails, catch the error, log it, and decide the next action (retry, skip, escalate).</li>
+          <li><strong>Graceful degradation:</strong> If a non-critical tool is unavailable (e.g., linter fails to run), the agent should continue with available tools and note the limitation in the PR description.</li>
+          <li><strong>Meaningful error messages:</strong> When an agent encounters an error it can't recover from, it should post a clear PR comment explaining what went wrong, what it tried, and what a human needs to do.</li>
+        </ul>
+
+        <pre><code># Pseudocode: Agent error handling pattern
+try:
+    test_result = run_tool("shell", "npm test")
+    if test_result.exit_code != 0:
+        # Tests failed — analyze and fix
+        failures = parse_test_output(test_result.stdout)
+        for failure in failures:
+            fix = generate_fix(failure)
+            apply_fix(fix)
+        # Re-run tests after fix
+        retest = run_tool("shell", "npm test")
+        if retest.exit_code != 0:
+            # Still failing — escalate to human
+            post_pr_comment("Tests still failing after attempted fix. "
+                          "Need human review. See workflow run for details.")
+            escalate()
+except ToolError as e:
+    post_pr_comment(f"Agent encountered an error: {e.message}. "
+                   "Pausing for human review.")
+    escalate()</code></pre>
+
+        <h4>Retries</h4>
+        <p>When transient errors occur (API rate limits, network timeouts), agents should retry intelligently:</p>
+        <ul>
+          <li><strong>Exponential backoff:</strong> Wait 1s, 2s, 4s, 8s between retries — don't hammer a failing service.</li>
+          <li><strong>Max retry limits:</strong> Don't retry forever. Set a maximum (e.g., 3 retries) and escalate after that.</li>
+          <li><strong>Idempotency checks:</strong> Before retrying a write operation, verify the previous attempt didn't partially succeed. Example: before retrying "create PR," check if a PR already exists for that branch.</li>
+        </ul>
+
+        <h4>Rollbacks</h4>
+        <p>When an agent's changes cause problems, rollback mechanisms should be available:</p>
+        <ul>
+          <li><strong><code>git revert</code>:</strong> Creates a new commit that undoes the agent's changes. Preserves history.</li>
+          <li><strong>Branch reset:</strong> For feature branches, reset to the state before the agent's changes.</li>
+          <li><strong>Environment rollback:</strong> If the agent triggered a deployment, roll back to the previous version.</li>
+          <li><strong>Configuration rollback:</strong> If the agent modified configuration, revert the config changes.</li>
+        </ul>
+
+        <h4>Escalation Paths</h4>
+        <p>When an agent should hand off to a human:</p>
+        <ul>
+          <li><strong>Failed retries:</strong> After exhausting retry attempts, the agent should stop and ask for help.</li>
+          <li><strong>Security alerts:</strong> If a code scan reveals vulnerabilities in the agent's code, escalate immediately.</li>
+          <li><strong>Out-of-scope changes:</strong> If the agent detects it needs to modify files outside its scope, stop and request expanded permissions.</li>
+          <li><strong>Ambiguous requirements:</strong> If the agent can't determine the correct approach from the issue description, ask for clarification.</li>
+          <li><strong>Conflicting instructions:</strong> If <code>copilot-instructions.md</code> conflicts with the issue description, escalate for resolution.</li>
+        </ul>
+
+        <h4>Traceability</h4>
+        <p>Every agent action must be traceable. This is non-negotiable for audit and debugging:</p>
+        <ul>
+          <li>Every code change linked to a <strong>commit</strong> with a descriptive message.</li>
+          <li>Every commit linked to a <strong>PR</strong> with a description of the plan and outcome.</li>
+          <li>Every PR linked to an <strong>issue</strong> (the original request).</li>
+          <li>Every tool invocation logged in a <strong>workflow run</strong>.</li>
+          <li>The complete chain: Issue &rarr; Plan &rarr; Branch &rarr; Commits &rarr; PR &rarr; CI Runs &rarr; Review &rarr; Merge.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Think of agent output like a <strong>junior developer's PR</strong>. You wouldn't merge a junior dev's PR without review, without CI passing, without understanding what was changed and why. Apply the same contributor model to agents: review everything, require checks, maintain an audit trail.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s4">Mark as Complete</button>
+          <span class="status-text" id="status-d2s4"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.5 ── -->
+      <div class="subsection" id="d2s5">
+        <h3>2.5 Copilot Agent Mode</h3>
+
+        <h4>Three Copilot Chat Modes</h4>
+        <p>GitHub Copilot Chat in VS Code offers three distinct interaction modes. Understanding the differences is important for the exam:</p>
+
+        <table>
+          <thead>
+            <tr><th>Mode</th><th>Behavior</th><th>Tool Use</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ask</strong></td>
+              <td>Read-only Q&amp;A. Copilot answers questions about your code but makes <strong>no changes</strong>.</td>
+              <td>None &mdash; read-only context from open files</td>
+              <td>Understanding code, exploring architecture, asking "how does this work?"</td>
+            </tr>
+            <tr>
+              <td><strong>Edit</strong> <em>(deprecated March 2026)</em></td>
+              <td>Surgical inline edits. Copilot makes targeted changes to specific files you select.</td>
+              <td>Limited &mdash; file edits only, no terminal, no tools</td>
+              <td>Small, focused refactors. Being replaced by agent mode's capabilities.</td>
+            </tr>
+            <tr>
+              <td><strong>Agent</strong></td>
+              <td><strong>Autonomous multi-step execution.</strong> Copilot plans steps, selects files, runs tools, iterates until the task is done.</td>
+              <td>Full &mdash; file I/O, terminal commands, MCP servers, GitHub API</td>
+              <td>Feature implementation, bug fixes, multi-file refactors, anything requiring reasoning + action.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p><strong>Agent mode</strong> is the only mode that is truly "agentic" &mdash; it autonomously decides what to do, uses tools, and iterates. Ask mode is purely conversational (human-led). Edit mode was a middle ground for inline changes but is deprecated in favor of agent mode's broader capabilities.</p>
+        </div>
+
+        <h4>How Agent Mode Works</h4>
+        <p>When you give agent mode a task, it follows the Plan &rarr; Act &rarr; Evaluate loop automatically:</p>
+        <ol>
+          <li><strong>Plans:</strong> Analyzes the request, identifies which files to read and modify, determines the steps needed.</li>
+          <li><strong>Selects context:</strong> Autonomously opens and reads relevant files &mdash; you don't have to manually select them.</li>
+          <li><strong>Acts:</strong> Creates/edits files, runs terminal commands (build, test, lint), invokes MCP tools.</li>
+          <li><strong>Evaluates:</strong> Reads command output, checks for errors, reviews test results.</li>
+          <li><strong>Iterates:</strong> If tests fail or errors occur, it modifies its approach and tries again.</li>
+        </ol>
+
+        <h4>Terminal Command Approval Flow</h4>
+        <p>Agent mode can run terminal commands, but <strong>potentially risky commands require user approval</strong>:</p>
+        <ul>
+          <li>When the agent wants to run a shell command, it <strong>surfaces the command in the chat</strong> for you to review.</li>
+          <li>You can <strong>approve</strong> the command (it runs), <strong>reject</strong> it (agent replans), or <strong>edit</strong> it before running.</li>
+          <li>Read-only commands (like <code>cat</code>, <code>ls</code>, <code>grep</code>) may run automatically depending on settings.</li>
+          <li>Destructive or write commands (<code>rm</code>, <code>git push</code>, <code>npm install</code>) typically require approval.</li>
+          <li>This approval flow is the <strong>human-in-the-loop</strong> safety mechanism for agent mode.</li>
+        </ul>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Important for the Exam</div>
+          <p>Terminal command approval is a key safety feature of agent mode. The agent <strong>cannot bypass this</strong> &mdash; it always surfaces risky commands for review. This is different from the cloud agent, which runs in an isolated environment with its own security model.</p>
+        </div>
+
+        <h4>MCP Integration in Agent Mode</h4>
+        <p>Agent mode accesses external tools through <strong>MCP servers</strong>:</p>
+        <ul>
+          <li>MCP servers configured in <code>.vscode/settings.json</code> are available as tools in agent mode.</li>
+          <li>The agent discovers available tools from connected MCP servers and can invoke them as needed.</li>
+          <li>Example: the GitHub MCP server gives agent mode access to issues, PRs, and repo operations without leaving the IDE.</li>
+          <li>You can enable/disable specific MCP tools via the Tools button in the chat panel.</li>
+        </ul>
+
+        <h4>Custom Instructions for Agent Mode</h4>
+        <p>Because agent mode works autonomously, <strong>clear instructions are essential</strong>. Without them, the agent may not follow your project's conventions:</p>
+
+        <pre><code># .github/copilot-instructions.md — Guiding agent mode behavior
+
+## Coding Conventions
+- Use TypeScript strict mode
+- File naming: kebab-case (e.g., user-service.ts)
+- Component naming: PascalCase (e.g., UserProfile.tsx)
+- Always use the shared logger from /src/lib/logger.ts
+
+## Agent Behavior
+- Before modifying any file, read it first to understand existing patterns
+- Run `npm test` after every code change
+- Run `npm run lint` before considering a task complete
+- Never modify files in /config/ without explicit user approval
+- When creating new files, follow the structure of existing similar files
+
+## Naming Conventions
+- API routes: /api/v2/[resource] (plural, kebab-case)
+- Database tables: snake_case (e.g., user_sessions)
+- Environment variables: SCREAMING_SNAKE_CASE</code></pre>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Agent mode needs <strong>explicit instructions</strong> because it works autonomously and cannot ask clarifying questions mid-task the way a human would. The <code>copilot-instructions.md</code> file is even more critical for agent mode than for ask/edit modes. Include naming conventions, file organization rules, testing requirements, and any constraints on what the agent should or should not modify.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s5">Mark as Complete</button>
+          <span class="status-text" id="status-d2s5"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.6 ── -->
+      <div class="subsection" id="d2s6">
+        <h3>2.6 Copilot Extensions</h3>
+
+        <h4>What Are Copilot Extensions?</h4>
+        <p>Copilot Extensions allow developers to <strong>extend Copilot Chat's capabilities</strong> with custom tools and integrations. They are <strong>GitHub Apps</strong> that users invoke via <code>@mention</code> in Copilot Chat (e.g., <code>@my-extension do something</code>).</p>
+
+        <p>There are two types of extensions:</p>
+
+        <div class="compare-grid">
+          <div class="compare-card">
+            <h5>Agents (Full Control)</h5>
+            <ul>
+              <li>Take <strong>full control</strong> of the request/response cycle</li>
+              <li>Can use <strong>custom LLMs</strong> (not limited to Copilot's model)</li>
+              <li>Implement custom logic, orchestration, and conversation management</li>
+              <li>Integrate with the Copilot API or any other AI provider</li>
+              <li>Handle the entire conversation flow themselves</li>
+              <li>Best for <strong>complex, domain-specific</strong> integrations</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h5>Skillsets (Lightweight)</h5>
+            <ul>
+              <li>Define <strong>API endpoints</strong> that Copilot can call</li>
+              <li>The <strong>platform handles</strong> routing, prompt crafting, and response formatting</li>
+              <li>Developer only needs to define the API and its schema</li>
+              <li>Uses Copilot's built-in LLM (no custom model needed)</li>
+              <li>Simpler to build and maintain</li>
+              <li>Best for <strong>straightforward tool integrations</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <h4>Agents vs. Skillsets Comparison</h4>
+
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>Agents</th><th>Skillsets</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Control over LLM</strong></td>
+              <td>Full &mdash; can use any LLM or the Copilot API</td>
+              <td>None &mdash; platform uses Copilot's built-in model</td>
+            </tr>
+            <tr>
+              <td><strong>Conversation management</strong></td>
+              <td>Extension manages the entire conversation</td>
+              <td>Platform manages conversation, extension provides data</td>
+            </tr>
+            <tr>
+              <td><strong>Complexity to build</strong></td>
+              <td>Higher &mdash; implement request handling, LLM calls, response streaming</td>
+              <td>Lower &mdash; define API endpoints and schemas</td>
+            </tr>
+            <tr>
+              <td><strong>Prompt crafting</strong></td>
+              <td>Extension crafts its own prompts</td>
+              <td>Platform crafts prompts from API descriptions</td>
+            </tr>
+            <tr>
+              <td><strong>Deployment</strong></td>
+              <td>GitHub App &mdash; hosted by the developer</td>
+              <td>GitHub App &mdash; hosted by the developer (API only)</td>
+            </tr>
+            <tr>
+              <td><strong>Invocation</strong></td>
+              <td><code>@agent-name</code> in Copilot Chat</td>
+              <td><code>@skillset-name</code> in Copilot Chat</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>How Extensions Work</h4>
+        <ol>
+          <li>Developer creates a <strong>GitHub App</strong> and configures it as a Copilot Extension.</li>
+          <li>For agents: implement a webhook endpoint that receives the user's message and returns a response (can call custom LLMs).</li>
+          <li>For skillsets: define API endpoints with OpenAPI-style descriptions so the platform knows when and how to call them.</li>
+          <li>Users install the extension and invoke it via <code>@mention</code> in Copilot Chat.</li>
+        </ol>
+
+        <pre><code># Example: Skillset definition (simplified)
+# The platform reads these descriptions to know when to call your API
+
+endpoints:
+  - name: get_ticket_status
+    description: "Get the status of a Jira ticket by its key"
+    url: "https://my-api.example.com/tickets/{ticket_key}"
+    method: GET
+    parameters:
+      - name: ticket_key
+        description: "The Jira ticket key (e.g., PROJ-123)"
+        required: true
+
+  - name: create_ticket
+    description: "Create a new Jira ticket with a title and description"
+    url: "https://my-api.example.com/tickets"
+    method: POST
+    parameters:
+      - name: title
+        required: true
+      - name: description
+        required: true
+      - name: priority
+        default: "medium"</code></pre>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Both extension types are <strong>GitHub Apps</strong> invoked via <code>@mention</code>. The key decision: use an <strong>agent</strong> when you need full control over the LLM and conversation flow (e.g., complex domain-specific reasoning). Use a <strong>skillset</strong> when you just need to expose API endpoints and let the platform handle the AI parts (e.g., querying a ticket system or looking up documentation).</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s6">Mark as Complete</button>
+          <span class="status-text" id="status-d2s6"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.7 ── -->
+      <div class="subsection" id="d2s7">
+        <h3>2.7 Agent Skills</h3>
+
+        <h4>What Are Agent Skills?</h4>
+        <p>Agent skills are <strong>folders containing instructions, scripts, and resources</strong> that Copilot automatically loads when they are relevant to the current task. They let you package domain-specific knowledge and tooling that the agent can discover and use.</p>
+
+        <h4>Skill Locations</h4>
+        <p>Skills can be defined at project level (shared with the team) or personal level (just for you):</p>
+
+        <table>
+          <thead>
+            <tr><th>Location</th><th>Scope</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.github/skills/</code></td>
+              <td>Project (repo)</td>
+              <td>Standard location for project-level skills. Committed to the repo, shared with all contributors.</td>
+            </tr>
+            <tr>
+              <td><code>.claude/skills/</code></td>
+              <td>Project (repo)</td>
+              <td>Skills for Claude-based agents. Same concept, different agent runtime.</td>
+            </tr>
+            <tr>
+              <td><code>.agents/skills/</code></td>
+              <td>Project (repo)</td>
+              <td>Generic agent skills directory. Works across multiple agent platforms.</td>
+            </tr>
+            <tr>
+              <td><code>~/.copilot/skills/</code></td>
+              <td>Personal (user)</td>
+              <td>User-level skills available across all repos. Not committed to any repo.</td>
+            </tr>
+            <tr>
+              <td><code>~/.agents/skills/</code></td>
+              <td>Personal (user)</td>
+              <td>Personal agent skills. Available across all repos for that user.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Skill Structure</h4>
+        <p>A skill folder typically contains:</p>
+
+        <pre><code>.github/skills/
+  deploy-to-staging/
+    instructions.md     # Natural language instructions for the agent
+    pre-deploy-check.sh # Script the agent can run
+    config.yaml         # Configuration or parameters
+    README.md           # Human-readable documentation
+  database-migration/
+    instructions.md
+    validate-migration.sql
+    rollback-template.sql</code></pre>
+
+        <h4>How Skills Work</h4>
+        <ul>
+          <li>The agent <strong>discovers skills automatically</strong> based on task context. If you ask the agent to "deploy to staging," it finds and loads the <code>deploy-to-staging</code> skill.</li>
+          <li>Skills work with <strong>Copilot cloud agent</strong>, <strong>Copilot CLI</strong>, and <strong>VS Code agent mode</strong>.</li>
+          <li>The <code>instructions.md</code> file is the core &mdash; it tells the agent what to do, what constraints apply, and what scripts/resources are available in the skill folder.</li>
+          <li>Skills are <strong>discoverable via the <code>gh skill</code> command</strong>, which lists available skills and their descriptions.</li>
+        </ul>
+
+        <pre><code># .github/skills/deploy-to-staging/instructions.md
+
+## Deploy to Staging
+
+### Purpose
+Deploy the current branch to the staging environment.
+
+### Steps
+1. Run `pre-deploy-check.sh` to validate the build
+2. Ensure all tests pass on the current branch
+3. Tag the commit with `staging-YYYY-MM-DD-HH-MM`
+4. Trigger the staging deployment workflow
+5. Wait for deployment to complete and verify health check
+
+### Constraints
+- Only deploy branches that have a passing CI run
+- Never deploy directly to production (this skill is staging-only)
+- If the health check fails, rollback immediately
+
+### Available Resources
+- `pre-deploy-check.sh` — validates build artifacts exist
+- `config.yaml` — staging environment configuration</code></pre>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Agent skills are a way to give agents <strong>pre-packaged domain knowledge</strong> for specific tasks. They are not code libraries &mdash; they are instructions and resources that guide agent behavior. The key distinction from <code>copilot-instructions.md</code>: instructions files apply globally to all agent interactions in a repo, while skills are <strong>task-specific and loaded on demand</strong> when relevant.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s7">Mark as Complete</button>
+          <span class="status-text" id="status-d2s7"></span>
+        </div>
+      </div>
+
+      <!-- ── 2.8 ── -->
+      <div class="subsection" id="d2s8">
+        <h3>2.8 Copilot SDK</h3>
+
+        <h4>What Is the Copilot SDK?</h4>
+        <p>The Copilot SDK allows developers to <strong>embed Copilot's agentic core into any application</strong>. It provides programmatic access to the same engine that powers Copilot CLI and agent mode, so you can build custom tools that plan, invoke tools, edit files, and run commands.</p>
+
+        <div class="concept-box">
+          <div class="concept-box-title">Technical Preview</div>
+          <p>The Copilot SDK is currently in <strong>technical preview</strong>. The API surface may change. However, the exam study guide references it, so you should understand its purpose and capabilities.</p>
+        </div>
+
+        <h4>Core Capabilities</h4>
+        <ul>
+          <li><strong>Planning:</strong> The SDK can generate multi-step plans for a given task, similar to agent mode's planning phase.</li>
+          <li><strong>Tool invocation:</strong> Call tools (file system, shell, APIs, MCP servers) programmatically.</li>
+          <li><strong>File editing:</strong> Read and modify files in a working directory, with diff-based editing.</li>
+          <li><strong>Command execution:</strong> Run shell commands and process their output.</li>
+          <li><strong>Conversation management:</strong> Maintain multi-turn conversations with context.</li>
+        </ul>
+
+        <h4>Relationship to Other Copilot Features</h4>
+
+        <div class="flow-diagram">
+          <div class="flow-step">Copilot SDK</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step highlight">Agentic Core Engine</div>
+          <span class="flow-arrow">&larr;</span>
+          <div class="flow-step">Copilot CLI / Agent Mode</div>
+        </div>
+
+        <p>The SDK exposes the same underlying engine that Copilot CLI and VS Code agent mode use. Think of it as:</p>
+        <ul>
+          <li><strong>Copilot CLI</strong> = the agentic core in a terminal interface</li>
+          <li><strong>Agent mode</strong> = the agentic core in the VS Code interface</li>
+          <li><strong>Copilot SDK</strong> = the agentic core as a library you can embed in your own applications</li>
+        </ul>
+
+        <h4>Use Cases</h4>
+        <ul>
+          <li><strong>Custom CI/CD agents:</strong> Build GitHub Actions that use the SDK for intelligent code analysis and modification.</li>
+          <li><strong>Internal developer tools:</strong> Embed agentic capabilities into internal tooling (e.g., a custom code migration tool).</li>
+          <li><strong>Automated workflows:</strong> Create scripts that use the SDK to perform complex, multi-step development tasks programmatically.</li>
+          <li><strong>Custom integrations:</strong> Build domain-specific agents that combine the SDK with your organization's APIs and tools.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The Copilot SDK is the <strong>programmatic interface</strong> to Copilot's agentic capabilities. It is the foundation that other Copilot features (CLI, agent mode) are built on. For the exam, know that it exists, that it's in technical preview, and that its purpose is to let developers build custom agentic tools using the same engine that powers Copilot.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d2s8">Mark as Complete</button>
+          <span class="status-text" id="status-d2s8"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DOMAIN 3: Manage Memory, State & Execution (10-15%)               -->
+    <!-- ================================================================== -->
+    <section class="domain-section" id="domain3">
+      <div class="domain-title">
+        <span class="domain-badge badge-purple">10-15%</span>
+        <h2>Domain 3: Manage Memory, State &amp; Execution</h2>
+      </div>
+      <p class="domain-meta">3 subtopics &mdash; How agents remember things, maintain state across interactions, detect when their context drifts from reality, and share state across tools and environments.</p>
+
+      <!-- ── 3.1 ── -->
+      <div class="subsection" id="d3s1">
+        <h3>3.1 Agent Memory Strategies</h3>
+
+        <h4>Short-Term Memory</h4>
+        <p>Short-term memory is the agent's working context within a <strong>single session or task</strong>:</p>
+        <ul>
+          <li><strong>Conversation context:</strong> The messages exchanged so far in the current session.</li>
+          <li><strong>Current task state:</strong> What the agent is working on right now — the issue, the plan, what it's already done.</li>
+          <li><strong>Tool call results:</strong> Outputs from tools invoked during this session.</li>
+          <li><strong>Scope:</strong> Limited to the current session. When the session ends, short-term memory is lost.</li>
+        </ul>
+        <p>Short-term memory is the agent's "working memory" — analogous to holding information in your head while you work on something. It's limited by the context window of the underlying model.</p>
+
+        <h4>Long-Term Memory</h4>
+        <p>Long-term memory persists across sessions and tasks:</p>
+        <ul>
+          <li><strong><code>copilot-instructions.md</code>:</strong> The primary long-term memory mechanism for GitHub Copilot agents. Stored in the repo, persists indefinitely, shared across all sessions.</li>
+          <li><strong><code>.github/copilot-instructions.md</code>:</strong> Repo-level instructions — accessible to the agent every time it interacts with that repo.</li>
+          <li><strong>Persistent configuration:</strong> Settings, preferences, and constraints that the agent applies consistently.</li>
+          <li><strong>Learned patterns:</strong> Over time, agents can be configured to reference past decisions (stored in issues, PR descriptions, or dedicated memory files).</li>
+        </ul>
+
+        <pre><code># .github/copilot-instructions.md — Acts as long-term memory
+
+## Project Context
+- This is a Node.js 20 + TypeScript project
+- We use ESLint with our custom config
+- Tests use Vitest, not Jest
+- Database is PostgreSQL via Prisma ORM
+- API follows REST conventions (not GraphQL)
+
+## Coding Conventions
+- Use functional components (no classes)
+- Error handling: always use custom AppError class
+- Logging: use the shared logger from /src/lib/logger.ts
+- File naming: kebab-case for files, PascalCase for components
+
+## Past Decisions
+- We chose Prisma over TypeORM (PR #89 — type safety was the deciding factor)
+- Rate limiting uses token bucket, not sliding window (Issue #112)
+- Auth uses JWT with short-lived access tokens + refresh tokens (PR #134)</code></pre>
+
+        <h4>External Memory</h4>
+        <p>Beyond the agent's built-in memory, external systems serve as memory stores:</p>
+        <ul>
+          <li><strong>Issue trackers:</strong> Issues contain requirements, decisions, and discussion history.</li>
+          <li><strong>Wikis:</strong> Project documentation, architecture decisions, runbooks.</li>
+          <li><strong>Documentation:</strong> README files, API docs, design docs.</li>
+          <li><strong>Databases:</strong> Structured data the agent can query for historical context.</li>
+          <li><strong>File-based state:</strong> JSON/YAML files in the repo tracking agent state (e.g., a <code>.agent-state.json</code> tracking what's been done).</li>
+        </ul>
+
+        <h4>Scoping Memory to Task-Relevant Information</h4>
+        <p>A common failure mode is <strong>context window pollution</strong> — loading too much irrelevant information into the agent's context, crowding out what it actually needs. Best practices:</p>
+        <ul>
+          <li>Only load files relevant to the current task.</li>
+          <li>Summarize large documents rather than including them verbatim.</li>
+          <li>Use targeted queries (search for specific function names, not entire directories).</li>
+          <li>Prune conversation history — remove resolved threads, keep open items.</li>
+        </ul>
+
+        <h4>Memory Expiration, Pruning, and Reset</h4>
+        <ul>
+          <li><strong>Expiration:</strong> Short-term memory naturally expires when a session ends. Long-term memory in instructions files persists until manually updated.</li>
+          <li><strong>Pruning:</strong> Periodically review and remove outdated information from <code>copilot-instructions.md</code>. Old conventions that no longer apply can mislead the agent.</li>
+          <li><strong>Reset:</strong> For a fresh start, clear the agent's conversation history. In more extreme cases, remove or rewrite the instructions file.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The exam distinguishes between <strong>short-term</strong> (session-scoped), <strong>long-term</strong> (repo-scoped, via <code>copilot-instructions.md</code>), and <strong>external</strong> (issues, wikis, databases) memory. Expect questions asking you to identify the right memory strategy for a given scenario. Rule of thumb: if it needs to persist across sessions, it's long-term. If it's specific to this task, it's short-term. If it's shared across the organization, it's external.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d3s1">Mark as Complete</button>
+          <span class="status-text" id="status-d3s1"></span>
+        </div>
+      </div>
+
+      <!-- ── 3.2 ── -->
+      <div class="subsection" id="d3s2">
+        <h3>3.2 Persist Agent State and Manage Context Drift</h3>
+
+        <h4>Durable Artifacts as State</h4>
+        <p>Agents don't have built-in persistent storage between sessions. Instead, they use GitHub's existing artifact system to persist state:</p>
+        <ul>
+          <li><strong>PR descriptions as state:</strong> The PR description contains the agent's plan, current progress, and remaining tasks. When the agent resumes, it reads the PR description to understand where it left off.</li>
+          <li><strong>Issue comments as progress logs:</strong> The agent posts progress updates as issue comments. This creates a chronological log of what's been done.</li>
+          <li><strong>Commit messages as decision records:</strong> Each commit message explains not just <em>what</em> changed but <em>why</em>, creating a history of decisions.</li>
+        </ul>
+
+        <pre><code>## PR #412 — Agent State (auto-updated)
+
+### Plan
+- [x] Create rate limiting middleware
+- [x] Add configuration via environment variables
+- [ ] Write unit tests for rate limiter
+- [ ] Integration test with API endpoints
+- [ ] Update API documentation
+
+### Current State
+Step 3 of 5. Middleware implemented and tested locally.
+Awaiting test write pass.
+
+### Context
+- Using token bucket algorithm (per Issue #112 decision)
+- Configuration: RATE_LIMIT_WINDOW=60, RATE_LIMIT_MAX=100
+- Dependencies added: none (implemented in-house)</code></pre>
+
+        <h4>Resuming Work</h4>
+        <p>When an agent needs to pick up where it left off (e.g., after a CI failure, after receiving review feedback, or after a session timeout):</p>
+        <ol>
+          <li>Read the PR description for the current plan and progress.</li>
+          <li>Read recent issue comments for progress updates.</li>
+          <li>Read the branch's commit history for what's already been done.</li>
+          <li>Read CI results for the current state of tests and checks.</li>
+          <li>Read review comments for feedback that needs to be addressed.</li>
+        </ol>
+
+        <h4>Context Drift Detection</h4>
+        <p><strong>Context drift</strong> occurs when the agent's understanding of the codebase diverges from reality. This happens when:</p>
+        <ul>
+          <li><strong>Stale file references:</strong> The agent's plan references files that have been renamed, moved, or deleted by another developer or agent.</li>
+          <li><strong>Outdated dependencies:</strong> The agent is working with dependency versions that have been updated in the meantime.</li>
+          <li><strong>Changed requirements:</strong> The issue was updated with new requirements after the agent started working, but the agent is still following the original requirements.</li>
+          <li><strong>Concurrent changes:</strong> Another developer or agent modified the same files the agent is working on.</li>
+        </ul>
+
+        <h4>Correcting Drift</h4>
+        <ul>
+          <li><strong>Re-reading current state:</strong> Before making changes, always <code>git pull</code> or re-fetch the latest file contents. Never rely on cached state.</li>
+          <li><strong>Refreshing context:</strong> Re-read the issue description, PR comments, and linked documents to check for updates.</li>
+          <li><strong>Comparing plan vs. actual:</strong> Diff the planned changes against the current state of the code. If the code has changed since the plan was created, update the plan.</li>
+          <li><strong>Merge conflict detection:</strong> If the agent's branch has conflicts with the default branch, resolve them before continuing.</li>
+        </ul>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Common Exam Scenario</div>
+          <p>The exam may present a scenario where an agent is working on a PR and another developer merges a conflicting change to main. The correct answer involves the agent <strong>detecting the drift</strong> (via merge conflict or failing tests), <strong>pulling the latest changes</strong>, <strong>resolving conflicts</strong>, and <strong>re-evaluating its plan</strong>.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d3s2">Mark as Complete</button>
+          <span class="status-text" id="status-d3s2"></span>
+        </div>
+      </div>
+
+      <!-- ── 3.3 ── -->
+      <div class="subsection" id="d3s3">
+        <h3>3.3 Ensure Continuity Across Tools and Environments</h3>
+
+        <h4>Sharing Agent State</h4>
+        <p>When multiple tools or environments are involved, agents need to share state consistently:</p>
+        <ul>
+          <li><strong>Via Git (branches/commits):</strong> The code on a branch is the primary shared state. Any tool or environment that can read the branch has access to the agent's work.</li>
+          <li><strong>Via GitHub API (issues/PRs/comments):</strong> Structured data in issues and PRs serves as a communication channel between agents, tools, and humans.</li>
+          <li><strong>Via artifacts:</strong> GitHub Actions artifacts can store files (logs, reports, build outputs) that persist across workflow runs.</li>
+        </ul>
+
+        <h4>Preventing Conflicting Context</h4>
+        <p>When multiple agents or tools operate on the same repo, conflicts can arise:</p>
+        <ul>
+          <li><strong>Single source of truth:</strong> Designate one location as the authoritative state (usually the PR description or a specific issue). All agents read from and write to this location.</li>
+          <li><strong>Merge conflict resolution:</strong> When two agents modify the same file, standard git merge conflict resolution applies. The orchestrator should detect conflicts and either auto-resolve (for trivial conflicts) or escalate.</li>
+          <li><strong>Lock mechanisms:</strong> For critical operations (like deployments), use a locking mechanism to prevent two agents from acting simultaneously. GitHub environments with protection rules can serve this purpose.</li>
+        </ul>
+
+        <h4>Preventing Stale Context</h4>
+        <ul>
+          <li><strong>Always read current state before acting:</strong> Before modifying a file, re-read it. Don't rely on a cached version from an earlier step.</li>
+          <li><strong>Validate assumptions:</strong> If the agent's plan assumes a function signature exists, verify it before writing code that calls it.</li>
+          <li><strong>Timestamp-based freshness checks:</strong> Compare the last-modified time of the branch or PR with the agent's last read time. If it's changed, refresh before acting.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The exam tests your understanding of state sharing in multi-tool scenarios. The correct answer almost always involves using <strong>Git as the source of truth</strong> (branches and commits) with <strong>GitHub API objects (PRs, issues) as the coordination layer</strong>. Avoid storing critical state in ephemeral locations (environment variables, in-memory caches) that don't persist.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d3s3">Mark as Complete</button>
+          <span class="status-text" id="status-d3s3"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DOMAIN 4: Perform Evaluation, Error Analysis & Tuning (15-20%)    -->
+    <!-- ================================================================== -->
+    <section class="domain-section" id="domain4">
+      <div class="domain-title">
+        <span class="domain-badge badge-yellow">15-20%</span>
+        <h2>Domain 4: Perform Evaluation, Error Analysis &amp; Tuning</h2>
+      </div>
+      <p class="domain-meta">3 subtopics &mdash; Defining what "success" means for agents, analyzing failures and their root causes, and tuning agent behavior based on results.</p>
+
+      <!-- ── 4.1 ── -->
+      <div class="subsection" id="d4s1">
+        <h3>4.1 Define Success Criteria and Evaluation Signals</h3>
+
+        <h4>Expected Outcomes</h4>
+        <p>Before an agent starts a task, you must define what success looks like. These are concrete, measurable outcomes:</p>
+        <ul>
+          <li><strong>Tests pass:</strong> All existing tests still pass, and new tests cover the changes.</li>
+          <li><strong>No new vulnerabilities:</strong> Code scanning (CodeQL), secret scanning, and dependency scanning report zero new alerts.</li>
+          <li><strong>Code quality metrics met:</strong> Linting passes, complexity thresholds maintained, no new tech debt.</li>
+          <li><strong>Review approved:</strong> At least one (or more, depending on policy) human reviewer approves the PR.</li>
+        </ul>
+
+        <h4>Operational Constraints</h4>
+        <p>Beyond functional outcomes, agents operate within constraints:</p>
+        <ul>
+          <li><strong>Time limits:</strong> An agent should complete its task within a reasonable timeframe. A stuck agent burning compute for hours is a resource waste.</li>
+          <li><strong>Resource limits:</strong> CPU, memory, API rate limits, token usage limits.</li>
+          <li><strong>Scope boundaries:</strong> The agent should only modify files and resources within its assigned scope.</li>
+        </ul>
+
+        <h4>Qualitative vs. Quantitative Signals</h4>
+        <div class="compare-grid">
+          <div class="compare-card">
+            <h5>Quantitative Signals</h5>
+            <ul>
+              <li>Test coverage percentage</li>
+              <li>Number of vulnerabilities (0 = pass)</li>
+              <li>Build time</li>
+              <li>Lines of code changed</li>
+              <li>Performance benchmarks (response time, throughput)</li>
+              <li>Lint error count</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h5>Qualitative Signals</h5>
+            <ul>
+              <li>Code readability and clarity</li>
+              <li>Documentation quality</li>
+              <li>Design pattern adherence</li>
+              <li>Naming consistency</li>
+              <li>Appropriate abstraction level</li>
+              <li>Reviewer subjective assessment</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4>Aligning Evaluation with Development Intent</h4>
+        <p>Evaluation should answer not just "does it compile?" but "<strong>does it solve the problem?</strong>":</p>
+        <ul>
+          <li>Does the implementation match the requirements in the issue?</li>
+          <li>Does it handle edge cases mentioned in the requirements?</li>
+          <li>Is the solution appropriate for the context (not over-engineered or under-engineered)?</li>
+          <li>Does it integrate well with the existing codebase (consistent patterns, conventions)?</li>
+        </ul>
+
+        <h4>Automated Scanning Tools</h4>
+        <p>GitHub provides several built-in tools that serve as evaluation signals:</p>
+
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>What It Scans</th><th>Output Format</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CodeQL</strong></td>
+              <td>Source code for security vulnerabilities, bugs, code quality issues</td>
+              <td>SARIF (uploaded to code scanning)</td>
+            </tr>
+            <tr>
+              <td><strong>Dependabot</strong></td>
+              <td>Dependencies for known vulnerabilities</td>
+              <td>Dependabot alerts, auto-generated PRs</td>
+            </tr>
+            <tr>
+              <td><strong>Secret scanning</strong></td>
+              <td>Committed code for exposed secrets (API keys, tokens, passwords)</td>
+              <td>Secret scanning alerts</td>
+            </tr>
+            <tr>
+              <td><strong>Third-party SARIF</strong></td>
+              <td>Any static analysis tool that outputs SARIF can upload results to GitHub's code scanning API</td>
+              <td>SARIF</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p><strong>CodeQL, Dependabot, and secret scanning</strong> are the three pillars of GitHub's built-in security scanning. An agent evaluates its own output by reading the results of these tools after pushing code. A clean scan is a pass signal; new alerts are a fail signal requiring the agent to fix the issue or escalate.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d4s1">Mark as Complete</button>
+          <span class="status-text" id="status-d4s1"></span>
+        </div>
+      </div>
+
+      <!-- ── 4.2 ── -->
+      <div class="subsection" id="d4s2">
+        <h3>4.2 Analyze Agent Failures and Root Causes</h3>
+
+        <h4>Failure Identification Sources</h4>
+        <p>When an agent's output is wrong or incomplete, you investigate using these sources:</p>
+        <ul>
+          <li><strong>Workflow logs:</strong> The GitHub Actions run log shows every step, including tool invocations and their outputs. This is usually the first place to look.</li>
+          <li><strong>Agent plans:</strong> Compare what the agent planned to do with what it actually did. Did it follow its own plan?</li>
+          <li><strong>Execution traces:</strong> Detailed logs of tool calls in order — which tools were called, with what parameters, and what they returned.</li>
+          <li><strong>Output diffs:</strong> Compare the agent's code changes against the expected outcome. Where does the diff diverge from expectations?</li>
+          <li><strong>CI artifacts:</strong> Test results, coverage reports, build logs — what specifically failed?</li>
+        </ul>
+
+        <h4>Root Cause Categories</h4>
+        <p>Agent failures fall into three broad categories. The exam tests your ability to classify a failure into the right category:</p>
+
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Symptoms</th><th>Examples</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Reasoning errors</strong></td>
+              <td>The agent chose the wrong approach, misunderstood the requirements, or made a logical mistake.</td>
+              <td>
+                <ul>
+                  <li>Implemented deletion instead of soft-delete</li>
+                  <li>Used wrong data structure (array instead of map)</li>
+                  <li>Misinterpreted "update" as "replace"</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Tool misuse</strong></td>
+              <td>The agent used the wrong tool, called a tool with incorrect parameters, or called tools in the wrong order.</td>
+              <td>
+                <ul>
+                  <li>Used <code>git push --force</code> instead of a regular push</li>
+                  <li>Called API endpoint with wrong HTTP method</li>
+                  <li>Tried to merge before CI completed</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Context/environment issues</strong></td>
+              <td>The agent had stale context, missing permissions, or the environment changed unexpectedly.</td>
+              <td>
+                <ul>
+                  <li>Built against old dependency versions</li>
+                  <li>Missing API token caused 401 errors</li>
+                  <li>File was renamed by another developer</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="concept-box">
+          <div class="concept-box-title">Key Exam Concept</div>
+          <p>When the exam describes an agent failure, ask yourself: Did the agent <strong>think wrong</strong> (reasoning error), <strong>do the wrong thing</strong> (tool misuse), or <strong>have the wrong information</strong> (context/environment)? The fix depends entirely on the category: refine instructions for reasoning errors, restrict or reconfigure tools for tool misuse, improve state management for context issues.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d4s2">Mark as Complete</button>
+          <span class="status-text" id="status-d4s2"></span>
+        </div>
+      </div>
+
+      <!-- ── 4.3 ── -->
+      <div class="subsection" id="d4s3">
+        <h3>4.3 Tune Agent Behavior</h3>
+
+        <h4>Revising Instructions</h4>
+        <p>The primary tuning mechanism is updating the agent's instruction files:</p>
+        <ul>
+          <li><strong>Update <code>copilot-instructions.md</code>:</strong> Add constraints, clarify conventions, provide examples of correct behavior.</li>
+          <li><strong>Refine prompts:</strong> Make instructions more specific. Instead of "write good tests," say "write tests using Vitest with describe/it blocks, cover happy path and at least 2 error paths."</li>
+          <li><strong>Add constraints:</strong> If the agent over-reaches, add explicit boundaries. "Do not modify files outside /src/api/" or "Always use the existing error handling pattern from /src/lib/errors.ts."</li>
+        </ul>
+
+        <pre><code># Before tuning — vague instruction
+Write tests for the new feature.
+
+# After tuning — specific instruction
+Write tests using Vitest. Structure:
+- One describe block per function
+- Test happy path
+- Test at least 2 error/edge cases
+- Use existing test fixtures from /tests/fixtures/
+- Mock external API calls using vi.mock()
+- Assert using expect().toEqual() or expect().toThrow()
+- Target 80%+ branch coverage for new code</code></pre>
+
+        <h4>Refining Memory</h4>
+        <ul>
+          <li><strong>Adjust what's stored:</strong> If the agent is making decisions based on outdated information, update or remove stale entries in <code>copilot-instructions.md</code>.</li>
+          <li><strong>Clear stale memory:</strong> Remove references to deprecated patterns, old dependencies, or renamed files.</li>
+          <li><strong>Improve memory scoping:</strong> If the agent loads too much context, narrow what it reads. Use targeted file references instead of broad directory includes.</li>
+        </ul>
+
+        <h4>Refining Tool Usage</h4>
+        <ul>
+          <li><strong>Restrict tool access:</strong> If the agent misuses a tool, remove it from the available tools list or add guardrails around its use.</li>
+          <li><strong>Expand tool access:</strong> If the agent is missing capabilities it needs, add new tools or MCP servers.</li>
+          <li><strong>Change tool ordering:</strong> Configure the agent to run linting before pushing (catch issues earlier) or run tests before creating a PR.</li>
+          <li><strong>Improve tool descriptions:</strong> In MCP server configurations, update tool descriptions to help the agent choose the right tool for each task.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Tuning is an iterative process: <strong>observe failure &rarr; classify root cause &rarr; apply targeted fix &rarr; re-evaluate</strong>. Reasoning errors are fixed with better instructions. Tool misuse is fixed with tool configuration changes. Context issues are fixed with memory and state management improvements. The exam wants you to match the fix to the root cause category.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d4s3">Mark as Complete</button>
+          <span class="status-text" id="status-d4s3"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DOMAIN 5: Orchestrate Multi-Agent Coordination (15-20%)           -->
+    <!-- ================================================================== -->
+    <section class="domain-section" id="domain5">
+      <div class="domain-title">
+        <span class="domain-badge badge-orange">15-20%</span>
+        <h2>Domain 5: Orchestrate Multi-Agent Coordination</h2>
+      </div>
+      <p class="domain-meta">4 subtopics &mdash; Patterns for running multiple agents together, observability in multi-agent systems, handling failures when multiple agents are involved, and managing agent lifecycles.</p>
+
+      <!-- ── 5.1 ── -->
+      <div class="subsection" id="d5s1">
+        <h3>5.1 Operate Multi-Agent Workflows</h3>
+
+        <h4>Orchestration Patterns</h4>
+        <p>When multiple agents collaborate on a project, they can be organized in different patterns. The exam expects you to know when to use each:</p>
+
+        <h4>Sequential Pattern (Pipeline)</h4>
+        <div class="flow-diagram">
+          <div class="flow-step">Agent A (Plan)</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step">Agent B (Implement)</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step">Agent C (Test)</div>
+          <span class="flow-arrow">&rarr;</span>
+          <div class="flow-step">Agent D (Review)</div>
+        </div>
+        <p>Each agent completes its work before the next starts. Agent A's output is Agent B's input. This is the simplest pattern — no concurrency concerns. Use for tasks with clear dependencies between phases.</p>
+
+        <pre><code># .github/workflows/sequential-agents.yml
+name: Sequential Agent Pipeline
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  plan:
+    if: github.event.label.name == 'agent-task'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Agent A — Generate plan
+        uses: my-org/planning-agent@v1
+        # Output: plan.json artifact
+
+  implement:
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Agent B — Implement plan
+        uses: my-org/coding-agent@v1
+        # Input: plan.json from previous job
+
+  test:
+    needs: implement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Agent C — Write and run tests
+        uses: my-org/testing-agent@v1
+
+  review:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Agent D — Review output
+        uses: my-org/review-agent@v1</code></pre>
+
+        <h4>Parallel Pattern</h4>
+        <p>Multiple agents work simultaneously on independent tasks:</p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">Agent A (Frontend)</div>
+          <span class="flow-arrow" style="visibility: hidden;">&rarr;</span>
+          <div class="flow-step">Agent B (Backend)</div>
+          <span class="flow-arrow" style="visibility: hidden;">&rarr;</span>
+          <div class="flow-step">Agent C (Tests)</div>
+        </div>
+        <p>All three work concurrently on different parts of the codebase. This is faster but requires <strong>agent isolation</strong> to prevent conflicts.</p>
+
+        <h4>Hierarchical Pattern</h4>
+        <div class="flow-diagram">
+          <div class="flow-step highlight">Orchestrator Agent</div>
+          <span class="flow-arrow">&darr;</span>
+        </div>
+        <div class="flow-diagram">
+          <div class="flow-step">Specialist A</div>
+          <span class="flow-arrow" style="visibility: hidden;">&rarr;</span>
+          <div class="flow-step">Specialist B</div>
+          <span class="flow-arrow" style="visibility: hidden;">&rarr;</span>
+          <div class="flow-step">Specialist C</div>
+        </div>
+        <p>An orchestrator agent breaks down the task and delegates sub-tasks to specialist agents. The orchestrator monitors progress and handles coordination.</p>
+
+        <h4>Fan-Out / Fan-In Pattern</h4>
+        <p>One agent spawns multiple sub-tasks (fan-out), which are processed by multiple agents. Results are collected and combined (fan-in) by the original or a dedicated collector agent.</p>
+
+        <pre><code># Fan-out: One orchestrator creates 5 sub-issues
+# Each sub-issue is picked up by an independent agent
+# Fan-in: Orchestrator waits for all 5 to complete, then merges results
+
+Fan-out:
+  Orchestrator -> creates Issue #201 (module-auth)
+  Orchestrator -> creates Issue #202 (module-billing)
+  Orchestrator -> creates Issue #203 (module-notifications)
+
+Parallel execution:
+  Agent-A works on #201
+  Agent-B works on #202
+  Agent-C works on #203
+
+Fan-in:
+  Orchestrator detects all 3 PRs merged
+  Orchestrator creates integration PR combining all changes
+  Orchestrator runs integration tests</code></pre>
+
+        <h4>Agent Isolation for Parallel Execution</h4>
+        <p>When agents run in parallel, they need isolation to prevent conflicts:</p>
+        <ul>
+          <li><strong>Separate branches:</strong> Each agent works on its own feature branch. No two agents modify the same branch.</li>
+          <li><strong>Separate working directories:</strong> In CI, each agent job has its own checkout of the repo.</li>
+          <li><strong>Sandboxed environments:</strong> Each agent runs in its own container or VM, with independent file systems, environment variables, and network access.</li>
+          <li><strong>File-level locking:</strong> If agents must work in the same directory, use a locking mechanism to prevent concurrent edits to the same file.</li>
+        </ul>
+
+        <h4>Conflict Detection and Resolution</h4>
+        <ul>
+          <li><strong>Overlapping code changes (merge conflicts):</strong> When two agents modify the same file, merging their branches will produce a conflict. The orchestrator should detect this and either auto-resolve (if the changes are in different parts of the file) or escalate.</li>
+          <li><strong>Duplicated effort:</strong> Two agents independently solving the same problem. The orchestrator should prevent this by clearly scoping each agent's task.</li>
+          <li><strong>Contradictory outputs:</strong> Two agents produce solutions that disagree (e.g., one adds a feature, the other removes it). The orchestrator must detect the contradiction and resolve it (usually by escalating to a human).</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Know when to use each orchestration pattern. <strong>Sequential</strong> for dependent phases. <strong>Parallel</strong> for independent tasks (but requires isolation). <strong>Hierarchical</strong> when a coordinator is needed. <strong>Fan-out/fan-in</strong> for tasks that can be decomposed, processed independently, and recombined.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d5s1">Mark as Complete</button>
+          <span class="status-text" id="status-d5s1"></span>
+        </div>
+      </div>
+
+      <!-- ── 5.2 ── -->
+      <div class="subsection" id="d5s2">
+        <h3>5.2 Configure Observability for Multi-Agent Behavior</h3>
+
+        <h4>Artifacts Suitable for Review</h4>
+        <p>In multi-agent workflows, observability is harder because actions are distributed. You need consolidated artifacts:</p>
+        <ul>
+          <li><strong>Per-agent logs:</strong> Each agent produces its own execution log (tool calls, decisions, errors). These are typically stored as workflow run logs or artifacts.</li>
+          <li><strong>Combined workflow summaries:</strong> A summary view that shows all agents' activities in one place — which agents ran, what they produced, how long they took, and whether they succeeded.</li>
+          <li><strong>Diff reports:</strong> A consolidated diff showing all changes made by all agents, making it easy to review the aggregate impact.</li>
+        </ul>
+
+        <h4>Documenting Decisions, Handoffs, and Outcomes</h4>
+        <p>In multi-agent systems, the handoff between agents is a critical point that must be documented:</p>
+        <ul>
+          <li><strong>Decisions:</strong> When an agent makes a significant decision (choosing an approach, skipping a step), it should log the decision and the reasoning in a PR comment or workflow log.</li>
+          <li><strong>Handoffs:</strong> When Agent A passes work to Agent B, the handoff should be explicit. Agent A's output (a branch, an artifact, a PR update) is Agent B's input. Both sides log the handoff.</li>
+          <li><strong>Outcomes:</strong> Each agent documents its final output — what was accomplished, what remains, any issues encountered.</li>
+        </ul>
+
+        <pre><code>## Multi-Agent Workflow Summary — Issue #156
+
+### Agent: Planner (completed in 45s)
+- Read issue #156 requirements
+- Generated implementation plan (5 tasks)
+- Handoff: created sub-issues #157-#161
+
+### Agent: Coder-A (completed in 3m 12s)
+- Picked up sub-issue #157 (auth middleware)
+- Created branch feature/auth-middleware
+- Opened PR #412, all checks pass
+- Handoff: PR ready for review
+
+### Agent: Coder-B (completed in 2m 45s)
+- Picked up sub-issue #158 (rate limiter)
+- Created branch feature/rate-limiter
+- Opened PR #413, 1 test failure (fixing)
+- Status: IN PROGRESS
+
+### Agent: Reviewer (waiting)
+- Will review PRs #412 and #413 when both are ready</code></pre>
+
+        <h4>Post-Hoc Analysis</h4>
+        <p>After a multi-agent workflow completes, analysis should cover:</p>
+        <ul>
+          <li><strong>Reconstructing what happened:</strong> Timeline of all agent actions, in chronological order, across all agents.</li>
+          <li><strong>Identifying bottlenecks:</strong> Which agent took the longest? Was any agent idle waiting for another?</li>
+          <li><strong>Measuring effectiveness:</strong> Did the multi-agent approach save time vs. a single agent? Were there redundant efforts?</li>
+          <li><strong>Improving for next time:</strong> What would you change about the orchestration pattern, agent scoping, or handoff mechanisms?</li>
+        </ul>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d5s2">Mark as Complete</button>
+          <span class="status-text" id="status-d5s2"></span>
+        </div>
+      </div>
+
+      <!-- ── 5.3 ── -->
+      <div class="subsection" id="d5s3">
+        <h3>5.3 Detect and Respond to Multi-Agent Failures</h3>
+
+        <h4>Types of Multi-Agent Failures</h4>
+
+        <table>
+          <thead>
+            <tr><th>Failure Type</th><th>Description</th><th>Detection Signal</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Failed execution</strong></td>
+              <td>An agent crashes, times out, or exhausts resources (memory, API limits).</td>
+              <td>Non-zero exit code, workflow failure, timeout alert.</td>
+            </tr>
+            <tr>
+              <td><strong>Partial completion</strong></td>
+              <td>Some agents succeed while others fail. The overall task is incomplete.</td>
+              <td>Mixed status in the orchestrator's tracking — some sub-tasks done, others not.</td>
+            </tr>
+            <tr>
+              <td><strong>Stalled agent</strong></td>
+              <td>An agent is running but making no progress — infinite loop, deadlock, waiting on an unavailable resource.</td>
+              <td>No new commits/comments for an extended period, high resource usage with no output.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Recovery Patterns</h4>
+        <ul>
+          <li><strong>Rollback (revert all agent changes):</strong> When the multi-agent workflow produces an inconsistent state, revert all changes from all agents and start over. This is the safest but most expensive option.</li>
+          <li><strong>Human-in-the-loop (pause and ask):</strong> Pause the entire workflow, alert a human, and wait for instructions. The human decides whether to continue, rollback, or take a different approach.</li>
+          <li><strong>Retry individual agents:</strong> If only one agent failed and the failure is transient (network issue, rate limit), retry just that agent while keeping the others' results.</li>
+          <li><strong>Graceful degradation:</strong> If a non-critical agent fails (e.g., the documentation agent), continue the workflow without it and note the gap.</li>
+        </ul>
+
+        <pre><code># Recovery decision tree
+if all_agents_failed:
+    rollback_all_changes()
+    alert_human("Complete failure — rollback executed")
+elif critical_agent_failed:
+    if is_transient_error(failure):
+        retry_agent(failed_agent, max_retries=3)
+    else:
+        pause_workflow()
+        alert_human("Critical agent failed — needs investigation")
+elif non_critical_agent_failed:
+    log_gap(f"{failed_agent.name} failed — continuing without it")
+    continue_workflow()
+elif agent_stalled:
+    if stall_duration > timeout_threshold:
+        kill_agent(stalled_agent)
+        alert_human("Agent stalled and was terminated")</code></pre>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Common Exam Scenario</div>
+          <p>The exam often presents a scenario where Agent A succeeds but Agent B fails in a parallel workflow. The correct answer depends on whether Agent B's work is critical (must rollback and retry) or non-critical (can continue with graceful degradation). Always assess <strong>criticality</strong> before choosing a recovery pattern.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d5s3">Mark as Complete</button>
+          <span class="status-text" id="status-d5s3"></span>
+        </div>
+      </div>
+
+      <!-- ── 5.4 ── -->
+      <div class="subsection" id="d5s4">
+        <h3>5.4 Manage Agent Lifecycle in Multi-Agent Workflows</h3>
+
+        <h4>Adding Agents</h4>
+        <p>When adding a new agent to an existing multi-agent workflow:</p>
+        <ul>
+          <li><strong>Integrate without disruption:</strong> The new agent should be added in a way that doesn't require stopping or restarting running agents.</li>
+          <li><strong>Define its scope clearly:</strong> What tasks will it handle? What files/resources does it own? How does it interact with existing agents?</li>
+          <li><strong>Test in isolation first:</strong> Run the new agent on a test branch/repo before integrating into the production workflow.</li>
+          <li><strong>Update the orchestrator:</strong> The orchestrator needs to know about the new agent — its capabilities, inputs, outputs, and where it fits in the workflow.</li>
+        </ul>
+
+        <h4>Updating Agents</h4>
+        <p>Agent updates include version changes, configuration updates, and prompt improvements:</p>
+        <ul>
+          <li><strong>Rolling updates:</strong> Update agents one at a time, verifying each works before updating the next. Safest approach for critical workflows.</li>
+          <li><strong>Blue-green deployment:</strong> Run the old and new versions of an agent simultaneously. Route some tasks to the new version, verify results, then switch all traffic. Best for high-risk updates.</li>
+          <li><strong>Version management:</strong> Pin agent versions in workflow files (e.g., <code>uses: my-org/coding-agent@v2.1.0</code>) so updates are explicit and reversible.</li>
+          <li><strong>Config changes:</strong> Update <code>copilot-instructions.md</code> or agent configuration files. These take effect on the next agent invocation.</li>
+        </ul>
+
+        <h4>Retiring Agents</h4>
+        <p>When an agent is no longer needed:</p>
+        <ul>
+          <li><strong>Graceful shutdown:</strong> Allow the agent to complete any in-progress tasks before stopping it.</li>
+          <li><strong>Preserve audit trail:</strong> Don't delete the agent's history — its PRs, commits, issues, and logs are part of the project's record.</li>
+          <li><strong>Redirect responsibilities:</strong> If the retired agent handled certain tasks, either assign them to another agent or to a human.</li>
+          <li><strong>Maintain workflow continuity:</strong> Removing an agent from a pipeline shouldn't break downstream agents. Update the orchestrator configuration.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>Agent lifecycle management mirrors application lifecycle management. The exam expects you to apply familiar concepts (rolling updates, blue-green deployments, graceful shutdown) to agents specifically. A key point: <strong>always preserve the audit trail</strong> when retiring an agent — its history matters for traceability.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d5s4">Mark as Complete</button>
+          <span class="status-text" id="status-d5s4"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DOMAIN 6: Implement Guardrails & Accountability (10-15%)          -->
+    <!-- ================================================================== -->
+    <section class="domain-section" id="domain6">
+      <div class="domain-title">
+        <span class="domain-badge badge-red">10-15%</span>
+        <h2>Domain 6: Implement Guardrails &amp; Accountability</h2>
+      </div>
+      <p class="domain-meta">2 subtopics &mdash; Defining appropriate autonomy levels for agents based on risk, and implementing guardrails and human-in-the-loop controls.</p>
+
+      <!-- ── 6.1 ── -->
+      <div class="subsection" id="d6s1">
+        <h3>6.1 Define Autonomy Levels</h3>
+
+        <h4>Risk Classification</h4>
+        <p>Before setting an autonomy level, classify the <strong>risk</strong> of the agent's actions across three dimensions:</p>
+
+        <table>
+          <thead>
+            <tr><th>Risk Dimension</th><th>Question</th><th>Examples</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Operational risk</strong></td>
+              <td>Can it break the build, cause downtime, or degrade performance?</td>
+              <td>Modifying CI config, changing database schemas, touching deployment scripts.</td>
+            </tr>
+            <tr>
+              <td><strong>Security risk</strong></td>
+              <td>Can it expose secrets, create vulnerabilities, or weaken access controls?</td>
+              <td>Modifying auth code, handling encryption, managing API keys, changing permissions.</td>
+            </tr>
+            <tr>
+              <td><strong>Compliance risk</strong></td>
+              <td>Does it violate regulatory requirements, licensing, or organizational policies?</td>
+              <td>Handling PII, modifying audit logging, changing data retention, license-incompatible dependencies.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>The Autonomy Spectrum</h4>
+        <p>Rather than a strict numbered scale, think of agent autonomy as a practical spectrum that maps to <strong>real GitHub Copilot modes and configurations</strong>:</p>
+
+        <table>
+          <thead>
+            <tr><th>Autonomy Level</th><th>Copilot Parallel</th><th>Behavior</th><th>Appropriate For</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Human-led</strong></td>
+              <td>Ask mode (read-only Q&amp;A)</td>
+              <td>Human does all the work. Agent only answers questions and suggests approaches — no code changes, no tool use.</td>
+              <td>Exploring unfamiliar code, learning, extremely high-risk situations.</td>
+            </tr>
+            <tr>
+              <td><strong>Human-in-the-loop</strong></td>
+              <td>Edit mode / Agent mode with approval gates</td>
+              <td>Agent proposes edits or actions; human approves each significant step before execution. Agent cannot act without sign-off.</td>
+              <td>High-risk, compliance-sensitive work. Security-critical code changes. New or unproven agents.</td>
+            </tr>
+            <tr>
+              <td><strong>Supervised autonomous</strong></td>
+              <td>Agent mode (standard) / Cloud agent with PR review</td>
+              <td>Agent autonomously plans, writes code, runs tools, opens PRs — but a human reviews and merges. Agent iterates on feedback.</td>
+              <td>Standard development. <strong>This is the most common and recommended level</strong> for production use.</td>
+            </tr>
+            <tr>
+              <td><strong>Auto-merge with checks</strong></td>
+              <td>Cloud agent + auto-merge rules</td>
+              <td>Agent can merge its own PR if all automated checks pass (CI, scans, code quality). No human review required.</td>
+              <td>Low-risk, well-defined tasks: dependency bumps, lint fixes, doc updates.</td>
+            </tr>
+            <tr>
+              <td><strong>Fully autonomous</strong></td>
+              <td>End-to-end agent pipeline</td>
+              <td>Agent operates without any human interaction, including deployment and monitoring.</td>
+              <td>Extremely low-risk, highly reversible actions only. Rare in practice.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="danger-box">
+          <div class="danger-box-title">Critical Exam Point</div>
+          <p><strong>Supervised autonomous (agent acts, human reviews before merge)</strong> is the default recommendation for most production agent use cases. It balances speed with safety. If you're unsure which level to choose on the exam, this is usually the right answer for standard development work. The key GitHub features enforcing this are <strong>branch protection rules</strong> and <strong>required PR reviews</strong>.</p>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-box-title">Exam Terminology Note</div>
+          <p>The GitHub documentation and study guide use terms like <strong>"autonomous"</strong> for agent mode and <strong>"in the loop"</strong> for edit mode. On the exam, focus on matching the <em>behavior description</em> (does the agent need approval? can it merge?) rather than memorizing a specific numbered scale. The practical distinction is: who holds the final approval — the agent, the automated checks, or a human?</p>
+        </div>
+
+        <h4>Right-Sizing Human Interventions</h4>
+        <p>The goal is to match the intervention level to the risk level:</p>
+        <ul>
+          <li>Documentation-only change? Auto-merge with checks is fine.</li>
+          <li>New API endpoint? Supervised autonomous (human reviews the PR before merge).</li>
+          <li>Authentication system changes? Human-in-the-loop (approve each step) or at minimum supervised autonomous with security team CODEOWNERS.</li>
+          <li>Database migration in production? Human-in-the-loop or fully human-led.</li>
+        </ul>
+
+        <h4>Balancing Delivery Speed with Compliance and Responsible AI</h4>
+        <p>The exam tests your understanding that there's a tension between speed and safety. The right approach:</p>
+        <ul>
+          <li>Automate everything that <em>can</em> be automated safely (CI, scans, linting).</li>
+          <li>Require human judgment only where it <em>adds value</em> (novel decisions, security-sensitive changes, compliance).</li>
+          <li>Use risk classification to route: low-risk tasks get fast-tracked, high-risk tasks get thorough review.</li>
+          <li>Responsible AI standards: agents should not make decisions that have ethical implications without human oversight (e.g., content moderation, user-facing language, accessibility).</li>
+        </ul>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d6s1">Mark as Complete</button>
+          <span class="status-text" id="status-d6s1"></span>
+        </div>
+      </div>
+
+      <!-- ── 6.2 ── -->
+      <div class="subsection" id="d6s2">
+        <h3>6.2 Implement Guardrails and Human-in-the-Loop</h3>
+
+        <h4>Actions Requiring Human Judgment</h4>
+        <p>Not every action should be automated. The exam expects you to identify scenarios that require human review:</p>
+        <ul>
+          <li><strong>Irreversible changes:</strong> Database migrations that drop columns, permanent data deletion, removing API endpoints that external clients depend on.</li>
+          <li><strong>Security-sensitive operations:</strong> Changes to authentication/authorization code, encryption implementations, API key management, RBAC configurations.</li>
+          <li><strong>Compliance-related decisions:</strong> Changes affecting data privacy (GDPR, CCPA), audit logging, license compliance, regulatory reporting.</li>
+          <li><strong>Novel/unprecedented situations:</strong> The agent encounters something not covered by its instructions or the existing codebase. When in doubt, escalate.</li>
+        </ul>
+
+        <h4>Blocking Policy Violations with GitHub Features</h4>
+        <p>GitHub provides several mechanisms to enforce guardrails:</p>
+
+        <h4>Branch Protection Rules</h4>
+        <pre><code># Branch protection for 'main' branch
+Settings:
+  Require pull request reviews:
+    Required approving reviews: 2
+    Dismiss stale PR approvals: true
+    Require review from CODEOWNERS: true
+  Require status checks:
+    Required checks: [ci, codeql, secret-scan]
+    Require branches to be up to date: true
+  Restrict pushes:
+    Restrict who can push: [deploy-team]
+  Enforce for administrators: true</code></pre>
+
+        <h4>CODEOWNERS</h4>
+        <pre><code># .github/CODEOWNERS
+
+# Security team must review auth changes
+/src/auth/              @org/security-team
+/src/middleware/auth*    @org/security-team
+
+# Platform team must review infrastructure
+/infrastructure/        @org/platform-team
+Dockerfile              @org/platform-team
+docker-compose*.yml     @org/platform-team
+
+# Database team must review migrations
+/migrations/            @org/database-team
+*.sql                   @org/database-team
+
+# Frontend team owns UI components
+/src/components/        @org/frontend-team
+/src/styles/            @org/frontend-team</code></pre>
+
+        <h4>Rulesets</h4>
+        <p>Rulesets are GitHub's newer, more flexible alternative to branch protection rules:</p>
+        <ul>
+          <li>Can be applied at the <strong>organization level</strong> (affect all repos in the org).</li>
+          <li>Can be <strong>layered</strong> — multiple rulesets can apply to the same branch.</li>
+          <li>Support <strong>bypass lists</strong> — specific users or teams can bypass specific rules.</li>
+          <li>Support <strong>tag rules</strong> — not just branches.</li>
+          <li>Can enforce <strong>merge methods</strong> (squash only, rebase only).</li>
+        </ul>
+
+        <h4>Required Status Checks</h4>
+        <p>Status checks are automated validation that must pass before a PR can be merged:</p>
+        <ul>
+          <li><strong>CI pipeline:</strong> Build + test suite must pass.</li>
+          <li><strong>Code scanning (CodeQL):</strong> No new security alerts.</li>
+          <li><strong>Secret scanning:</strong> No secrets detected in the code.</li>
+          <li><strong>Custom checks:</strong> Any GitHub Actions workflow that reports a check status.</li>
+          <li>When configured as "required," these block merge until they pass — even for agents.</li>
+        </ul>
+
+        <h4>Least-Privilege Access</h4>
+        <p>The principle of least privilege applied to agents:</p>
+        <ul>
+          <li><strong>Scoped tokens:</strong> Use fine-grained personal access tokens (PATs) or GitHub App tokens that only grant the permissions the agent needs.</li>
+          <li><strong>Minimal permissions in workflows:</strong> Set <code>permissions</code> in workflow YAML to the narrowest scope needed.</li>
+          <li><strong>Environment-specific access:</strong> The agent gets different permissions in dev vs. staging vs. production.</li>
+        </ul>
+
+        <pre><code># Minimal permissions for an agent that reviews PRs
+permissions:
+  contents: read        # Read repo files
+  pull-requests: write  # Post review comments
+  # No: issues write, deployments, packages, etc.</code></pre>
+
+        <h4>Explicit Authorization for Irreversible/Compliance-Sensitive Changes</h4>
+        <ul>
+          <li><strong>Required approvals:</strong> Set a higher approval threshold for sensitive paths (2+ reviewers for <code>/src/auth/</code>).</li>
+          <li><strong>Deployment gates:</strong> GitHub Environments with required reviewers. The agent cannot deploy until a designated person approves.</li>
+          <li><strong>Environment protection rules:</strong> Wait timers (delay deployment by N minutes for human review window), required reviewers, branch restrictions.</li>
+        </ul>
+
+        <pre><code># GitHub Environment: production
+Protection rules:
+  Required reviewers: @org/platform-leads (at least 1)
+  Wait timer: 15 minutes
+  Deployment branches: only 'main'
+
+# This means an agent CANNOT deploy to production without:
+# 1. Code being on 'main' branch (requires PR merge)
+# 2. A platform lead approving the deployment
+# 3. A 15-minute window for additional review</code></pre>
+
+        <h4>Preserving Execution Velocity</h4>
+        <p>Guardrails shouldn't make everything slow. The goal is to be fast where it's safe:</p>
+        <ul>
+          <li><strong>Auto-approve low-risk changes:</strong> Auto-merge PRs that only change documentation, comments, or test fixtures (when all checks pass).</li>
+          <li><strong>Fast-track well-scoped agents:</strong> Agents with a proven track record on specific task types can get streamlined review.</li>
+          <li><strong>Focus human attention on high-risk:</strong> Use CODEOWNERS and rulesets to route human review to where it matters most.</li>
+          <li><strong>Parallelize checks:</strong> Run CI, scans, and code quality checks in parallel to minimize wait time.</li>
+        </ul>
+
+        <div class="exam-tip">
+          <div class="exam-tip-title">Key Exam Concept</div>
+          <p>The exam wants you to demonstrate that guardrails are <strong>proportional to risk</strong>. The correct answer is never "block everything" (too slow) or "allow everything" (too risky). It's always: classify the risk, apply the right level of oversight, and automate what can be automated safely. Use <strong>branch protection rules</strong>, <strong>CODEOWNERS</strong>, <strong>required status checks</strong>, and <strong>environment protection rules</strong> as your toolkit.</p>
+        </div>
+
+        <div class="mark-complete-wrapper">
+          <button class="btn-complete" data-section="d6s2">Mark as Complete</button>
+          <span class="status-text" id="status-d6s2"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- CROSS-CUTTING: GitHub-Specific Concepts   -->
+    <!-- ══════════════════════════════════════════ -->
+    <section class="domain-section" id="crosscutting">
+      <div class="domain-title">
+        <span class="domain-badge" style="background: rgba(255,255,255,0.1); color: var(--text-primary);">Reference</span>
+        <h2>Cross-Cutting GitHub Concepts</h2>
+      </div>
+      <p class="domain-meta">These concepts appear across multiple domains. Make sure you know each one well.</p>
+
+      <div class="subsection">
+        <h3>Quick Reference: GitHub Features for Agentic AI</h3>
+
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>What It Is</th><th>How Agents Use It</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>copilot-instructions.md</code></td>
+              <td>Custom instruction file for Copilot behavior. Can be placed at repo root or <code>.github/</code> directory.</td>
+              <td>Long-term memory, coding conventions, planning rules, tool constraints. Agent reads this every session.</td>
+            </tr>
+            <tr>
+              <td><code>.github/copilot-instructions.md</code></td>
+              <td>Repo-level Copilot configuration (in the <code>.github</code> directory).</td>
+              <td>Same as above but specifically scoped to the repo. This is the conventional location.</td>
+            </tr>
+            <tr>
+              <td>Copilot agent mode</td>
+              <td>Autonomous multi-step coding mode in VS Code. One of three modes (Ask, Edit, Agent). Agent mode plans, edits files, runs terminal commands, uses MCP tools, and iterates on errors. Surfaces risky terminal commands for user approval.</td>
+              <td>The primary interface for interactive agentic development. Uses MCP tools. Guided by <code>copilot-instructions.md</code> for conventions and constraints.</td>
+            </tr>
+            <tr>
+              <td>Copilot cloud agent</td>
+              <td>GitHub-hosted agent execution environment. Runs in the cloud, not on the developer's machine.</td>
+              <td>For CI-triggered agent tasks, background work, and tasks that need GitHub's infrastructure.</td>
+            </tr>
+            <tr>
+              <td>Copilot Extensions</td>
+              <td>GitHub Apps that extend Copilot Chat. Two types: <strong>Agents</strong> (full control, custom LLMs) and <strong>Skillsets</strong> (lightweight, platform-managed). Invoked via <code>@mention</code>.</td>
+              <td>Add domain-specific tools (Jira integration, custom linters, internal APIs). Agents for complex integrations, skillsets for simple API endpoints.</td>
+            </tr>
+            <tr>
+              <td>Agent Skills</td>
+              <td>Folders containing instructions, scripts, and resources in <code>.github/skills/</code> (project) or <code>~/.copilot/skills/</code> (personal).</td>
+              <td>Pre-packaged, task-specific knowledge that agents load on demand. Discoverable via <code>gh skill</code>.</td>
+            </tr>
+            <tr>
+              <td>Copilot SDK</td>
+              <td>Programmatic API to embed Copilot's agentic core in custom applications. Technical preview.</td>
+              <td>Build custom agentic tools, CI/CD agents, and internal developer tools using the same engine as Copilot CLI.</td>
+            </tr>
+            <tr>
+              <td>GitHub Actions</td>
+              <td>CI/CD and workflow automation platform.</td>
+              <td>Agent orchestration — trigger agents on events (PR opened, issue labeled, schedule), coordinate multi-agent workflows.</td>
+            </tr>
+            <tr>
+              <td>Branch protection rules</td>
+              <td>Policies that protect branches from direct pushes and unreviewed merges.</td>
+              <td>Guardrails that prevent agents from pushing directly to main. Require PR + review + checks.</td>
+            </tr>
+            <tr>
+              <td>Rulesets</td>
+              <td>Newer, more flexible branch/tag policies. Can be applied at org level.</td>
+              <td>Organization-wide guardrails for agent behavior across all repos.</td>
+            </tr>
+            <tr>
+              <td>CODEOWNERS</td>
+              <td>Maps files/directories to required reviewers.</td>
+              <td>Routes agent-generated changes to the right human reviewers based on what was modified.</td>
+            </tr>
+            <tr>
+              <td>Required status checks</td>
+              <td>CI and scan results that must pass before merge.</td>
+              <td>Automated evaluation signals — agent's code must pass CI, CodeQL, and secret scanning before merge is allowed.</td>
+            </tr>
+            <tr>
+              <td>GitHub MCP server</td>
+              <td>Official MCP server at <code>api.githubcopilot.com/mcp/</code></td>
+              <td>Provides structured access to GitHub resources (repos, issues, PRs, files) via the MCP protocol.</td>
+            </tr>
+            <tr>
+              <td>SARIF format</td>
+              <td>Static Analysis Results Interchange Format. Standard for security scan results.</td>
+              <td>Agents upload scan results in SARIF format to GitHub's code scanning API. Used as evaluation signals.</td>
+            </tr>
+            <tr>
+              <td>Contributor model for agents</td>
+              <td>Treating agent output like a junior developer's code — review everything, require checks.</td>
+              <td>The philosophical framework: agents are contributors, not administrators. Their work goes through the same review process as human work.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="course-footer">
+  GH-600 Exam Prep &mdash; Course Material &mdash; Passing score: 700/1000
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                              -->
+<!-- ════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── All tracked section IDs ──
+  var ALL_SECTIONS = [
+    'd1s1','d1s2','d1s3',
+    'd2s1','d2s2','d2s3','d2s4','d2s5','d2s6','d2s7','d2s8',
+    'd3s1','d3s2','d3s3',
+    'd4s1','d4s2','d4s3',
+    'd5s1','d5s2','d5s3','d5s4',
+    'd6s1','d6s2'
+  ];
+
+  // Map domain IDs to their child section IDs
+  var DOMAIN_SECTIONS = {
+    domain1: ['d1s1','d1s2','d1s3'],
+    domain2: ['d2s1','d2s2','d2s3','d2s4','d2s5','d2s6','d2s7','d2s8'],
+    domain3: ['d3s1','d3s2','d3s3'],
+    domain4: ['d4s1','d4s2','d4s3'],
+    domain5: ['d5s1','d5s2','d5s3','d5s4'],
+    domain6: ['d6s1','d6s2']
+  };
+
+  var STORAGE_KEY = 'gh600_course_progress';
+
+  // ── Load / Save progress ──
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e) { /* ignore */ }
+    return {};
+  }
+
+  function saveProgress(progress) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch(e) { /* ignore */ }
+  }
+
+  // ── Render UI state from progress ──
+  function renderProgress() {
+    var progress = loadProgress();
+    var completed = 0;
+
+    // Update sub-section checks and buttons
+    ALL_SECTIONS.forEach(function(id) {
+      var done = progress[id] === true;
+      if (done) completed++;
+
+      // Sidebar sub-item
+      var subItem = document.querySelector('.sidebar-sub-item[data-section="' + id + '"]');
+      if (subItem) {
+        if (done) {
+          subItem.classList.add('completed');
+        } else {
+          subItem.classList.remove('completed');
+        }
+      }
+
+      // Sub-check circle
+      var subCheck = document.getElementById('subcheck-' + id);
+      if (subCheck && done) {
+        subCheck.style.borderColor = 'var(--green)';
+        subCheck.style.background = 'var(--green)';
+      } else if (subCheck) {
+        subCheck.style.borderColor = '';
+        subCheck.style.background = '';
+      }
+
+      // Mark complete button
+      var btn = document.querySelector('.btn-complete[data-section="' + id + '"]');
+      if (btn) {
+        if (done) {
+          btn.classList.add('completed');
+          btn.textContent = 'Completed';
+        } else {
+          btn.classList.remove('completed');
+          btn.textContent = 'Mark as Complete';
+        }
+      }
+
+      // Status text
+      var statusEl = document.getElementById('status-' + id);
+      if (statusEl) {
+        if (done) {
+          statusEl.classList.add('done');
+          statusEl.textContent = 'Section completed';
+        } else {
+          statusEl.classList.remove('done');
+          statusEl.textContent = '';
+        }
+      }
+    });
+
+    // Update domain-level checks
+    Object.keys(DOMAIN_SECTIONS).forEach(function(domainId) {
+      var subs = DOMAIN_SECTIONS[domainId];
+      var allDone = subs.every(function(s) { return progress[s] === true; });
+      var domainCheck = document.getElementById('check-' + domainId);
+      if (domainCheck) {
+        if (allDone) {
+          domainCheck.classList.add('done');
+          domainCheck.textContent = '✓';
+        } else {
+          domainCheck.classList.remove('done');
+          domainCheck.textContent = '';
+        }
+      }
+    });
+
+    // Update overall progress bar
+    var percent = ALL_SECTIONS.length > 0 ? Math.round((completed / ALL_SECTIONS.length) * 100) : 0;
+    var bar = document.getElementById('progressBar');
+    if (bar) bar.style.width = percent + '%';
+    var label = document.getElementById('progressPercent');
+    if (label) label.textContent = percent + '%';
+  }
+
+  // ── Mark complete click handler ──
+  function handleMarkComplete(e) {
+    var btn = e.target.closest('.btn-complete');
+    if (!btn) return;
+    var sectionId = btn.getAttribute('data-section');
+    if (!sectionId) return;
+
+    var progress = loadProgress();
+    // Toggle: if already completed, un-complete. Otherwise, mark complete.
+    if (progress[sectionId] === true) {
+      progress[sectionId] = false;
+    } else {
+      progress[sectionId] = true;
+    }
+    saveProgress(progress);
+    renderProgress();
+  }
+
+  // Attach to all mark-complete buttons via delegation
+  document.getElementById('courseMain').addEventListener('click', handleMarkComplete);
+
+  // ── Sidebar: expand/collapse domain sections ──
+  var domainHeaders = document.querySelectorAll('.sidebar-domain-header');
+  domainHeaders.forEach(function(header) {
+    header.addEventListener('click', function() {
+      var domainId = this.getAttribute('data-domain');
+      var subsEl = document.getElementById('subs-' + domainId);
+      if (!subsEl) return;
+
+      var isOpen = subsEl.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.sidebar-subsections').forEach(function(el) {
+        el.classList.remove('open');
+      });
+      document.querySelectorAll('.sidebar-domain-header').forEach(function(el) {
+        el.classList.remove('expanded');
+        el.classList.remove('active');
+        el.setAttribute('aria-expanded', 'false');
+      });
+
+      // Toggle this one
+      if (!isOpen) {
+        subsEl.classList.add('open');
+        this.classList.add('expanded');
+        this.classList.add('active');
+        this.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  // ── Sidebar: sub-item click scrolls to section ──
+  var subItems = document.querySelectorAll('.sidebar-sub-item');
+  subItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      var sectionId = this.getAttribute('data-section');
+      var target = document.getElementById(sectionId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      // Highlight active
+      subItems.forEach(function(s) { s.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+
+  // ── Sidebar: domain header click scrolls to domain ──
+  domainHeaders.forEach(function(header) {
+    // Use double-click to scroll (single click is expand/collapse)
+    header.addEventListener('dblclick', function() {
+      var domainId = this.getAttribute('data-domain');
+      var target = document.getElementById(domainId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ── Auto-expand first domain on load ──
+  var firstHeader = document.querySelector('.sidebar-domain-header[data-domain="domain1"]');
+  if (firstHeader) {
+    firstHeader.click();
+  }
+
+  // ── Initial render ──
+  renderProgress();
+
+})();
+</script>
+
+</body>
+</html>

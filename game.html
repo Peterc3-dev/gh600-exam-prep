@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GH-600 Exam Prep — Study Game</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ── Game-specific Layout ── */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .game-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .level-display {
+    text-align: center;
+  }
+
+  .level-number {
+    font-family: var(--font-mono);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    text-shadow: 0 0 20px var(--green-glow);
+  }
+
+  .level-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  .xp-section {
+    min-width: 200px;
+  }
+
+  .xp-text {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .streak-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--text-secondary);
+    min-width: 80px;
+  }
+
+  .streak-display.on-fire {
+    color: var(--orange);
+  }
+
+  .streak-count {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .streak-fire {
+    display: none;
+    font-size: 1.3rem;
+  }
+
+  .streak-display.on-fire .streak-fire {
+    display: inline;
+    animation: flame 0.5s ease infinite alternate;
+  }
+
+  .game-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* ── Mode Selection ── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .mode-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 500px) {
+    .mode-grid { grid-template-columns: 1fr; }
+  }
+
+  .mode-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .mode-card:hover {
+    border-color: var(--green-dim);
+    background: var(--bg-card-hover);
+    box-shadow: 0 0 25px var(--green-glow);
+    transform: translateY(-2px);
+  }
+
+  .mode-card.selected {
+    border-color: var(--green);
+    background: var(--green-glow);
+    box-shadow: 0 0 25px var(--green-glow);
+  }
+
+  .mode-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .mode-name { font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem; }
+  .mode-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+  .mode-meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Domain Selector ── */
+  .domain-selector {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .domain-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font-sans);
+  }
+
+  .domain-btn:hover {
+    border-color: var(--green-dim);
+    color: var(--text-primary);
+  }
+
+  .domain-btn.active {
+    border-color: var(--green);
+    background: var(--green-glow);
+    color: var(--green);
+  }
+
+  /* ── Game Area ── */
+  .game-area {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .game-area.active { display: block; }
+
+  .game-progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .game-progress-bar .progress-bar { flex: 1; }
+
+  .game-progress-text {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .timer-bar {
+    height: 4px;
+    background: var(--bg-input);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .timer-bar .fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--green);
+    transition: width 0.1s linear;
+  }
+
+  .timer-bar .fill.warning { background: var(--yellow); }
+  .timer-bar .fill.danger { background: var(--red); }
+
+  .timer-text {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--green);
+    text-align: right;
+    margin-bottom: 0.5rem;
+  }
+
+  .timer-text.warning { color: var(--yellow); }
+  .timer-text.danger { color: var(--red); }
+
+  /* ── Question Display ── */
+  .domain-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+
+  .q-type-badge {
+    display: inline-flex;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+  }
+
+  .answer-feedback {
+    display: none;
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .answer-feedback.correct {
+    display: block;
+    background: rgba(0, 255, 65, 0.08);
+    border: 1px solid var(--green-dim);
+  }
+
+  .answer-feedback.incorrect {
+    display: block;
+    background: rgba(255, 68, 68, 0.08);
+    border: 1px solid var(--red-dim, #cc3333);
+  }
+
+  .feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .feedback-header.correct { color: var(--green); }
+  .feedback-header.incorrect { color: var(--red); }
+
+  .feedback-explanation {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .xp-popup {
+    position: fixed;
+    top: 80px;
+    right: 2rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--green);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--green);
+    z-index: 150;
+    animation: xpPop 1.5s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes xpPop {
+    0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+    15% { opacity: 1; transform: translateY(0) scale(1.1); }
+    30% { transform: translateY(0) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-20px); }
+  }
+
+  @keyframes correctFlash {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.4); }
+    50% { box-shadow: 0 0 30px 10px rgba(0, 255, 65, 0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
+  }
+
+  @keyframes incorrectShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .question-card.correct-flash {
+    animation: correctFlash 0.6s ease;
+  }
+
+  .question-card.incorrect-shake {
+    animation: incorrectShake 0.4s ease;
+  }
+
+  /* ── Term Match ── */
+  .match-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .match-container { grid-template-columns: 1fr; }
+  }
+
+  .match-column h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .match-item {
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all var(--transition);
+    background: var(--bg-card);
+  }
+
+  .match-item:hover {
+    border-color: var(--green-dim);
+    background: var(--bg-card-hover);
+  }
+
+  .match-item.selected {
+    border-color: var(--green);
+    background: var(--green-glow);
+    color: var(--green);
+  }
+
+  .match-item.matched {
+    border-color: var(--green);
+    background: rgba(0, 255, 65, 0.08);
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .match-item.wrong {
+    border-color: var(--red);
+    background: rgba(255, 68, 68, 0.08);
+    animation: incorrectShake 0.4s ease;
+  }
+
+  .match-pair-num {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--green);
+    color: var(--bg-primary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-right: 0.5rem;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Results Screen ── */
+  .results-screen {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .results-screen.active { display: block; }
+
+  .results-hero {
+    text-align: center;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+  }
+
+  .results-score {
+    font-family: var(--font-mono);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  .results-subtitle {
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .results-domain-bars {
+    margin-bottom: 2rem;
+  }
+
+  .results-domain-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .results-domain-label {
+    font-size: 0.8rem;
+    min-width: 140px;
+    color: var(--text-secondary);
+  }
+
+  .results-domain-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-input);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .results-domain-bar .fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  .results-domain-pct {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* ── Stats Panel ── */
+  .stats-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stats-section h2 {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mastery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .mastery-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+
+  .mastery-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .mastery-card-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .mastery-card-pct {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .mastery-card-detail {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+  }
+
+  /* ── Survival Lives ── */
+  .survival-lives {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 1.2rem;
+  }
+
+  .survival-lives .life { opacity: 1; transition: opacity 0.3s; }
+  .survival-lives .life.lost { opacity: 0.2; }
+
+  /* ── Utility ── */
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  .mt-1 { margin-top: 1rem; }
+  .mt-2 { margin-top: 2rem; }
+  .mb-1 { margin-bottom: 1rem; }
+  .gap-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  .next-btn-area {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+</style>
+</head>
+<body class="scanline">
+
+<nav class="top-nav">
+  <a href="index.html" class="logo">GH-600<span> // EXAM PREP</span></a>
+  <div class="nav-links">
+    <a href="index.html">Hub</a>
+    <a href="course.html">Course</a>
+    <a href="game.html" class="active">Game</a>
+    <a href="exam.html">Exams</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═══ Player HUD ═══ -->
+  <div class="game-header">
+    <div class="game-header-left">
+      <div class="level-display">
+        <div class="level-number" id="levelNum">1</div>
+        <div class="level-label">Level</div>
+      </div>
+      <div class="xp-section">
+        <div class="xp-text">
+          <span id="xpCurrent">0</span>
+          <span id="xpTarget">/ 200 XP</span>
+        </div>
+        <div class="xp-bar">
+          <div class="fill" id="xpFill" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="streak-display" id="streakDisplay">
+        <span class="streak-fire">&#x1F525;</span>
+        <span class="streak-count" id="streakCount">0</span>
+        <span style="font-size: 0.7rem;">streak</span>
+      </div>
+    </div>
+    <div class="game-header-right">
+      <div class="survival-lives hidden" id="survivalLives">
+        <span class="life" id="life1">&#x2764;&#xFE0F;</span>
+        <span class="life" id="life2">&#x2764;&#xFE0F;</span>
+        <span class="life" id="life3">&#x2764;&#xFE0F;</span>
+      </div>
+      <span class="badge badge-green" id="totalScoreBadge">0 pts</span>
+    </div>
+  </div>
+
+  <!-- ═══ Mode Selection (home screen) ═══ -->
+  <div id="homeScreen">
+    <h2 style="margin-bottom:1rem;">Choose Game Mode</h2>
+
+    <div class="mode-grid">
+      <div class="mode-card" data-mode="quickfire">
+        <div class="mode-icon">&#x26A1;</div>
+        <div class="mode-name">Quick Fire</div>
+        <div class="mode-desc">10 rapid questions with a 15-second timer. Bonus XP for speed.</div>
+        <div class="mode-meta">10 Qs &middot; 15s each &middot; +speed bonus</div>
+      </div>
+      <div class="mode-card" data-mode="deepdive">
+        <div class="mode-icon">&#x1F50E;</div>
+        <div class="mode-name">Domain Deep Dive</div>
+        <div class="mode-desc">15 questions from a single domain. No timer, no pressure.</div>
+        <div class="mode-meta">15 Qs &middot; untimed &middot; domain focus</div>
+      </div>
+      <div class="mode-card" data-mode="survival">
+        <div class="mode-icon">&#x1F480;</div>
+        <div class="mode-name">Survival</div>
+        <div class="mode-desc">Keep answering until you miss 3. Questions get harder.</div>
+        <div class="mode-meta">&#x221E; Qs &middot; 3 lives &middot; escalating</div>
+      </div>
+      <div class="mode-card" data-mode="termmatch">
+        <div class="mode-icon">&#x1F517;</div>
+        <div class="mode-name">Term Match</div>
+        <div class="mode-desc">Match terms to their definitions. Click a term, then click its definition.</div>
+        <div class="mode-meta">5 rounds &middot; 5 pairs each &middot; accuracy</div>
+      </div>
+    </div>
+
+    <div id="domainSelectorArea" class="hidden">
+      <h3 style="margin-bottom:0.75rem; font-size:0.9rem; color:var(--text-secondary);">Select Domain</h3>
+      <div class="domain-selector">
+        <button class="domain-btn active" data-domain="0">All Domains</button>
+        <button class="domain-btn" data-domain="1">D1: Architecture</button>
+        <button class="domain-btn" data-domain="2">D2: Tool Use</button>
+        <button class="domain-btn" data-domain="3">D3: Memory &amp; State</button>
+        <button class="domain-btn" data-domain="4">D4: Evaluation</button>
+        <button class="domain-btn" data-domain="5">D5: Multi-Agent</button>
+        <button class="domain-btn" data-domain="6">D6: Guardrails</button>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" id="startGameBtn">Start Game</button>
+    </div>
+  </div>
+
+  <!-- ═══ Game Area ═══ -->
+  <div class="game-area" id="gameArea">
+    <div class="timer-text hidden" id="timerText">15.0s</div>
+    <div class="timer-bar hidden" id="timerBar"><div class="fill" id="timerFill"></div></div>
+    <div class="game-progress-bar">
+      <span class="game-progress-text" id="progressText">1 / 10</span>
+      <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="question-card" id="questionCard">
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+        <span class="domain-indicator" id="domainIndicator"></span>
+        <span class="q-type-badge" id="qTypeBadge"></span>
+      </div>
+      <div class="question-text" id="questionText"></div>
+      <ul class="option-list" id="optionList"></ul>
+      <div class="match-container hidden" id="matchContainer">
+        <div class="match-column">
+          <h4>Terms</h4>
+          <div id="matchTerms"></div>
+        </div>
+        <div class="match-column">
+          <h4>Definitions</h4>
+          <div id="matchDefs"></div>
+        </div>
+      </div>
+      <div class="answer-feedback" id="answerFeedback">
+        <div class="feedback-header" id="feedbackHeader"></div>
+        <div class="feedback-explanation" id="feedbackExplanation"></div>
+      </div>
+    </div>
+
+    <div class="next-btn-area">
+      <button class="btn btn-primary hidden" id="nextBtn">Next Question</button>
+    </div>
+  </div>
+
+  <!-- ═══ Results Screen ═══ -->
+  <div class="results-screen" id="resultsScreen">
+    <div class="results-hero">
+      <div class="results-score" id="resultsScore">0%</div>
+      <div class="results-subtitle" id="resultsSubtitle">Round Complete</div>
+    </div>
+
+    <div class="results-stats" id="resultsStats"></div>
+    <div class="results-domain-bars" id="resultsDomainBars"></div>
+
+    <div class="gap-row" style="justify-content:center;">
+      <button class="btn btn-primary btn-lg" id="playAgainBtn">Play Again</button>
+      <button class="btn btn-secondary btn-lg" id="backToModesBtn">Change Mode</button>
+    </div>
+  </div>
+
+  <!-- ═══ Lifetime Stats ═══ -->
+  <div class="stats-section" id="statsSection">
+    <h2>
+      Lifetime Stats
+      <button class="btn btn-ghost btn-sm" id="resetBtn">Reset Progress</button>
+    </h2>
+    <div class="stats-grid" id="lifetimeStats"></div>
+    <h3 style="margin-top:1.5rem; margin-bottom:0.75rem; font-size:0.95rem;">Domain Mastery</h3>
+    <div class="mastery-grid" id="masteryGrid"></div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  // ════════════════════════════════════════════
+  //  QUESTION BANK — 135 questions
+  // ════════════════════════════════════════════
+
+  var DOMAIN_NAMES = {
+    1: "Agent Architecture & SDLC",
+    2: "Tool Use & Environment",
+    3: "Memory, State & Execution",
+    4: "Evaluation & Error Analysis",
+    5: "Multi-Agent Coordination",
+    6: "Guardrails & Accountability"
+  };
+
+  var DOMAIN_COLORS = {
+    1: "var(--green)",
+    2: "var(--blue)",
+    3: "var(--purple)",
+    4: "var(--yellow)",
+    5: "var(--orange)",
+    6: "var(--red)"
+  };
+
+  // type: "mc" | "tf" | "fill" | "match"
+  // For mc/fill: options = [4 strings], answer = index (0-3)
+  // For tf: answer = true/false
+  // For match: pairs = [{term, def}, ...] (5 pairs)
+
+  var QUESTIONS = [
+    // ═══════ DOMAIN 1: Agent Architecture & SDLC (20 questions) ═══════
+    {domain:1, type:"mc", q:"What is the key distinction between an AI agent and an AI assistant?",
+      options:["Agents use larger models","Agents can autonomously plan, act, and evaluate toward a goal","Assistants cannot access tools","Agents always run in the cloud"],
+      answer:1, explain:"An agent operates with a plan-act-evaluate lifecycle and can take autonomous actions toward a goal, whereas an assistant responds to individual prompts without sustained goal pursuit."},
+    {domain:1, type:"mc", q:"Which file is used to provide long-term configuration and behavioral instructions to GitHub Copilot agents in a repository?",
+      options:["agent.yml",".copilotrc","copilot-instructions.md","AGENTS.md"],
+      answer:2, explain:"copilot-instructions.md is the dedicated file for providing persistent instructions and configuration to Copilot agents at the repository level."},
+    {domain:1, type:"tf", q:"In the agent lifecycle, the 'evaluate' step occurs before the 'act' step.",
+      answer:false, explain:"The agent lifecycle follows plan -> act -> evaluate. The agent first plans, then acts, and finally evaluates the outcome before potentially re-planning."},
+    {domain:1, type:"mc", q:"Which of the following is an anti-pattern in agent architecture?",
+      options:["Using structured plan output","Defining clear success criteria","Over-autonomy without human checkpoints","Implementing observability artifacts"],
+      answer:2, explain:"Over-autonomy is a recognized anti-pattern where agents take consequential actions without appropriate human oversight, risking unintended outcomes."},
+    {domain:1, type:"mc", q:"What does 'context pollution' refer to in agent architecture?",
+      options:["Too many environment variables","Irrelevant or conflicting information accumulating in the agent's context window","Running out of API rate limits","Using too many MCP servers"],
+      answer:1, explain:"Context pollution occurs when irrelevant, outdated, or conflicting information accumulates in the agent's working context, degrading reasoning quality and causing errors."},
+    {domain:1, type:"fill", q:"The agent lifecycle follows three core steps: plan, ___, and evaluate.",
+      options:["act","deploy","test","compile"], answer:0, explain:"The canonical agent lifecycle is plan -> act -> evaluate. The agent forms a plan, executes actions, then evaluates results."},
+    {domain:1, type:"mc", q:"What is 'goal drift' in the context of AI agents?",
+      options:["Changing the model mid-session","An agent gradually deviating from its original objective over multiple steps","Switching between different MCP servers","Lowering the temperature parameter over time"],
+      answer:1, explain:"Goal drift is an anti-pattern where an agent gradually deviates from its original objective, often due to compounding small misinterpretations over multiple reasoning steps."},
+    {domain:1, type:"tf", q:"A 'plan-first' PR approach means the agent creates and merges a plan document before writing any implementation code.",
+      answer:true, explain:"In a plan-first approach, the agent produces a planning artifact (like a design doc or issue) for human review before proceeding with implementation, ensuring alignment before effort is spent."},
+    {domain:1, type:"mc", q:"Which anti-pattern involves an agent performing actions that cannot be traced back to a plan or decision?",
+      options:["Scope creep","Missing traceability","Over-autonomy","Context pollution"],
+      answer:1, explain:"Missing traceability means the agent's actions lack clear connections to decisions, plans, or rationale, making it impossible to audit or debug the agent's behavior."},
+    {domain:1, type:"mc", q:"What should a well-defined agent task specification include?",
+      options:["Only the desired output format","Inputs, outputs, and success criteria","Just the model name and temperature","A list of all available tools"],
+      answer:1, explain:"A proper agent task specification should clearly define inputs (what the agent receives), outputs (what it should produce), and success criteria (how to judge completion)."},
+    {domain:1, type:"mc", q:"The 'contributor model' applied to agents means:",
+      options:["Agents pay for their own compute","Agents follow the same contribution workflows (branches, PRs, reviews) as human contributors","Only open-source contributors can use agents","Agents must be listed in CODEOWNERS"],
+      answer:1, explain:"The contributor model means agents participate in the same development workflows as humans — creating branches, opening PRs, going through reviews — rather than having special bypass paths."},
+    {domain:1, type:"tf", q:"Scope creep in agent architecture refers to an agent expanding its task beyond the originally defined boundaries.",
+      answer:true, explain:"Scope creep is an anti-pattern where an agent takes on work beyond its defined task boundaries, often leading to unexpected changes and increased risk."},
+    {domain:1, type:"fill", q:"An agent's planning output should be ___ so it can be reviewed and audited by humans.",
+      options:["structured","encrypted","minimized","randomized"], answer:0, explain:"Structured plan output enables human review, machine parsing, and auditability. Unstructured plans are harder to validate and trace."},
+    {domain:1, type:"mc", q:"What is the purpose of observability in agent architecture?",
+      options:["Making agents run faster","Providing visibility into agent decisions, actions, and state for debugging and auditing","Reducing model size","Encrypting agent communications"],
+      answer:1, explain:"Observability provides visibility into what an agent is doing, why it made decisions, and what state it is in, enabling debugging, auditing, and trust."},
+    {domain:1, type:"mc", q:"Which of the following best describes autonomy levels in agent design?",
+      options:["The number of tools an agent can access","A spectrum from fully human-controlled (level 0) to fully autonomous (level 4)","The speed at which an agent processes requests","The number of agents running in parallel"],
+      answer:1, explain:"Autonomy levels form a spectrum from 0 (human does everything) to 4 (agent acts fully autonomously), helping teams right-size how much independence to grant."},
+    {domain:1, type:"tf", q:"A plan+execution PR is one where the agent both proposes and implements changes in the same pull request.",
+      answer:true, explain:"A plan+execution PR bundles the agent's plan and its implementation together, allowing reviewers to see both the reasoning and the result in one place."},
+    {domain:1, type:"mc", q:"Which of the following is NOT a typical agent anti-pattern?",
+      options:["Over-autonomy","Context pollution","Structured plan output","Goal drift"],
+      answer:2, explain:"Structured plan output is a best practice, not an anti-pattern. The anti-patterns include over-autonomy, context pollution, goal drift, missing traceability, and scope creep."},
+    {domain:1, type:"fill", q:"The file ___ provides repository-level behavioral instructions to GitHub Copilot agents.",
+      options:["copilot-instructions.md","AGENTS.toml",".github/config.yml","agent-config.json"], answer:0, explain:"copilot-instructions.md is the standard file for configuring agent behavior at the repository level."},
+    {domain:1, type:"mc", q:"In a well-designed agent SDLC, when should success criteria be defined?",
+      options:["After the agent completes its work","Before the agent begins its task","Only when something goes wrong","Success criteria are optional"],
+      answer:1, explain:"Success criteria must be defined before the agent starts work so there is a clear, objective measure of whether the agent achieved its goal."},
+    {domain:1, type:"tf", q:"Agents and assistants are interchangeable terms in the GitHub Copilot ecosystem.",
+      answer:false, explain:"They are distinct concepts. Assistants respond to individual queries; agents autonomously pursue goals through the plan-act-evaluate lifecycle with sustained context."},
+
+    // ═══════ DOMAIN 2: Tool Use & Environment Interaction (38 questions) ═══════
+    {domain:2, type:"mc", q:"What does MCP stand for in the context of GitHub Copilot?",
+      options:["Model Compute Protocol","Master Control Panel","Model Context Protocol","Multi-Channel Pipeline"],
+      answer:2, explain:"MCP stands for Model Context Protocol. It is a standard protocol for connecting AI agents to external tools and data sources."},
+    {domain:2, type:"mc", q:"What is the URL for the GitHub MCP server?",
+      options:["mcp.github.com","api.github.com/mcp/","api.githubcopilot.com/mcp/","tools.copilot.github.com/mcp"],
+      answer:2, explain:"The official GitHub MCP server endpoint is api.githubcopilot.com/mcp/."},
+    {domain:2, type:"mc", q:"In VS Code, where do you configure MCP servers for Agent mode?",
+      options:["Settings > Extensions > MCP","File > Preferences > MCP Servers","Agent mode > Tools > Configure","Terminal > MCP > Add Server"],
+      answer:2, explain:"MCP servers are added through Agent mode > Tools > Configure in VS Code, which provides the interface for registering and managing MCP connections."},
+    {domain:2, type:"tf", q:"MCP servers can be either local (running on the developer's machine) or remote (hosted externally).",
+      answer:true, explain:"MCP supports both local servers (stdio-based, running locally) and remote servers (accessible over HTTPS/SSE), giving flexibility in deployment."},
+    {domain:2, type:"mc", q:"What is the purpose of MCP allow lists?",
+      options:["To list all available models","To control which MCP servers agents are permitted to use","To track API usage","To manage user authentication"],
+      answer:1, explain:"MCP allow lists control which MCP servers are permitted for use by agents, with options like 'Allow all' or 'Registry only' configured at the org/enterprise level."},
+    {domain:2, type:"fill", q:"MCP registries follow a v0.1 spec where server listings are fetched via HTTPS ___ requests to /v0.1/servers.",
+      options:["GET","POST","PUT","PATCH"], answer:0, explain:"The MCP registry specification uses HTTPS GET requests to the /v0.1/servers endpoint to retrieve the list of available MCP servers."},
+    {domain:2, type:"mc", q:"Which MCP allow list setting restricts agents to only use servers from approved registries?",
+      options:["Allow all","Block all","Registry only","Approved list"],
+      answer:2, explain:"'Registry only' restricts agents to only use MCP servers that are listed in approved registries, providing centralized control over available tools."},
+    {domain:2, type:"mc", q:"What is a repository-scoped agent?",
+      options:["An agent that can access any repository in the organization","An agent whose access and actions are confined to a specific repository","An agent that manages repository settings","An agent that only works with Git operations"],
+      answer:1, explain:"A repository-scoped agent has its permissions, tools, and actions confined to a specific repository, enforcing the principle of least privilege."},
+    {domain:2, type:"tf", q:"CI workflow agents run within GitHub Actions and can create pull requests autonomously.",
+      answer:true, explain:"Agents can operate within GitHub Actions workflows, performing tasks like code generation, testing, and opening pull requests as part of CI/CD pipelines."},
+    {domain:2, type:"mc", q:"What error handling strategy uses progressively longer waits between retry attempts?",
+      options:["Linear backoff","Exponential backoff","Immediate retry","Circuit breaker"],
+      answer:1, explain:"Exponential backoff increases the delay between retries exponentially (e.g., 1s, 2s, 4s, 8s), reducing pressure on failing systems and improving recovery chances."},
+    {domain:2, type:"mc", q:"What is the Copilot cloud agent firewall?",
+      options:["A WAF for Copilot Chat","Network isolation that restricts which external services cloud-hosted agents can reach","A code scanning feature","Encryption for agent communications"],
+      answer:1, explain:"The Copilot cloud agent firewall provides network isolation that controls which external endpoints cloud-hosted Copilot agents are allowed to communicate with."},
+    {domain:2, type:"fill", q:"When an agent encounters a tool failure, the ___ path defines how the error is communicated to the user or to a higher-level agent.",
+      options:["escalation","deployment","compilation","logging"], answer:0, explain:"The escalation path defines how tool failures are surfaced — whether to retry, notify a human, hand off to another agent, or gracefully degrade."},
+    {domain:2, type:"mc", q:"Which tool permission level allows an MCP tool to modify data?",
+      options:["Execute-only","Read-only","Read-write","Admin"],
+      answer:2, explain:"Read-write permissions allow tools to both read and modify data, as opposed to read-only which limits the tool to non-mutating operations."},
+    {domain:2, type:"tf", q:"Branch-based scoping means an agent works within a specific Git branch, isolating its changes from the main codebase.",
+      answer:true, explain:"Branch-based scoping confines agent changes to a specific branch, preventing direct modification of protected branches and enabling review via pull requests."},
+    {domain:2, type:"mc", q:"What is a rollback mechanism in the context of agent tool use?",
+      options:["Undoing the model's training","Reverting agent-made changes when something goes wrong","Resetting the agent's memory","Downgrading the agent's model version"],
+      answer:1, explain:"Rollback mechanisms allow reverting changes made by an agent (e.g., reverting a commit, closing a PR) when the outcome is incorrect or harmful."},
+    {domain:2, type:"mc", q:"Azure API Center can serve as what in the MCP ecosystem?",
+      options:["A model training platform","An MCP registry for discovering available tool servers","A code review tool","A CI/CD pipeline manager"],
+      answer:1, explain:"Azure API Center can function as an MCP registry, providing a centralized catalog where agents can discover available MCP tool servers."},
+    {domain:2, type:"mc", q:"What HTTP headers are required for MCP registries to support cross-origin access?",
+      options:["Authorization headers","CORS headers","Rate-limit headers","Cache-control headers"],
+      answer:1, explain:"MCP registries must include appropriate CORS headers to allow cross-origin requests from browser-based clients and IDE extensions."},
+    {domain:2, type:"fill", q:"An agent that creates PRs ___ should have its changes reviewed before merge, following the contributor model.",
+      options:["autonomously","manually","synchronously","randomly"], answer:0, explain:"Even when agents create PRs autonomously, the contributor model requires those PRs to go through human review before merging into protected branches."},
+    {domain:2, type:"tf", q:"Traceability requirements mean every agent action should be linkable to a plan, decision, or user request.",
+      answer:true, explain:"Traceability ensures every action taken by an agent can be traced back to a specific plan step, decision, or user request, enabling auditing and debugging."},
+    {domain:2, type:"mc", q:"Which retry strategy involves stopping all requests to a failing service for a period before testing if it has recovered?",
+      options:["Exponential backoff","Circuit breaker","Graceful degradation","Linear retry"],
+      answer:1, explain:"A circuit breaker pattern stops sending requests to a failing service after a threshold of failures, periodically testing if the service has recovered before resuming."},
+    {domain:2, type:"mc", q:"What is the recommended scope for agent tokens following security best practices?",
+      options:["Organization-wide admin access","Minimal permissions needed for the specific task","Full repository write access for all repos","Read access to all private repositories"],
+      answer:1, explain:"Following least-privilege principles, agent tokens should be scoped to the minimal permissions needed for the specific task at hand."},
+    {domain:2, type:"tf", q:"Local MCP servers communicate using the stdio transport mechanism.",
+      answer:true, explain:"Local MCP servers use stdio (standard input/output) as their transport mechanism, while remote MCP servers typically use HTTPS with Server-Sent Events."},
+    {domain:2, type:"mc", q:"What does 'graceful degradation' mean for agent error handling?",
+      options:["The agent crashes immediately on error","The agent continues with reduced functionality when a tool fails","The agent retries indefinitely","The agent ignores all errors"],
+      answer:1, explain:"Graceful degradation means the agent can continue operating with reduced functionality when a tool or service is unavailable, rather than failing completely."},
+    {domain:2, type:"fill", q:"The MCP allow list can be configured at the ___ or enterprise level to control which servers agents may use.",
+      options:["organization","repository","branch","file"], answer:0, explain:"MCP allow lists are configured at the organization or enterprise level, providing centralized governance over which MCP servers are available to agents."},
+    {domain:2, type:"mc", q:"When configuring MCP in VS Code, which Copilot mode must be active?",
+      options:["Edit mode","Chat mode","Agent mode","Inline mode"],
+      answer:2, explain:"MCP server configuration is available through Agent mode in VS Code, which enables full tool use and autonomous capabilities."},
+    {domain:2, type:"mc", q:"What is the primary risk of giving an agent read-write access to a production database tool?",
+      options:["Slower query performance","The agent could modify or delete production data","Increased API costs","Model context overflow"],
+      answer:1, explain:"Read-write access to production data means the agent could make unintended modifications or deletions. This is why least-privilege and environment scoping are critical."},
+    {domain:2, type:"tf", q:"MCP registries use HTTPS endpoints exclusively; plain HTTP is not supported by the specification.",
+      answer:true, explain:"The MCP registry specification requires HTTPS endpoints for security, ensuring encrypted communication when agents discover and connect to tool servers."},
+    {domain:2, type:"mc", q:"What happens when an agent's branch-based scope detects it is trying to push directly to the main branch?",
+      options:["The push succeeds with a warning","The push is blocked by branch protection rules","The agent automatically creates a fork","The commit is silently dropped"],
+      answer:1, explain:"Branch protection rules prevent direct pushes to protected branches like main. The agent must work on a feature branch and open a PR instead."},
+    {domain:2, type:"mc", q:"Which of the following best describes the GitHub MCP server's role?",
+      options:["It hosts Copilot models","It provides GitHub-specific tools (repos, issues, PRs) to agents via MCP","It manages billing for Copilot","It stores agent memory"],
+      answer:1, explain:"The GitHub MCP server at api.githubcopilot.com/mcp/ exposes GitHub-specific tools like repository access, issue management, and PR operations to agents through the MCP protocol."},
+    {domain:2, type:"fill", q:"Remote MCP servers typically use HTTPS with ___ (Server-Sent Events) for real-time streaming communication.",
+      options:["SSE","WebSocket","gRPC","MQTT"], answer:0, explain:"Remote MCP servers use HTTPS with SSE (Server-Sent Events) as the transport mechanism for streaming responses back to the client."},
+
+    // ═══════ Copilot Extensions & Modes (8 questions) ═══════
+    {domain:2, type:"mc", q:"What are the two types of Copilot Extensions?",
+      options:["Plugins and Widgets","Agents and Skillsets","Modules and Packages","Actions and Workflows"],
+      answer:1, explain:"Copilot Extensions come in two types: Agents (full control over the request/response, can use a custom LLM and manage conversation) and Skillsets (lightweight API endpoints where the platform handles routing and prompts)."},
+    {domain:2, type:"mc", q:"How are Copilot Extensions invoked by users?",
+      options:["Through a special CLI command","Via @mention in Copilot Chat","By clicking a toolbar button","Through a REST API call"],
+      answer:1, explain:"Both Agent and Skillset Copilot Extensions are GitHub Apps invoked by @mentioning them in Copilot Chat."},
+    {domain:2, type:"tf", q:"A Copilot Skillset extension manages its own LLM and has full control over the conversation.",
+      answer:false, explain:"Skillsets are lightweight — the platform handles routing and prompt construction. It is Agent extensions that have full control over the request/response cycle and can use a custom LLM."},
+    {domain:2, type:"mc", q:"Where can Agent Skills instruction folders be placed?",
+      options:["Only in the repository root","In .github/skills/, .claude/skills/, .agents/skills/, or personal ~/.copilot/skills/","Only in the .github directory","In any folder named 'skills' anywhere in the project"],
+      answer:1, explain:"Agent Skills are defined in specific folders: .github/skills/, .claude/skills/, .agents/skills/ within repos, or personal ~/.copilot/skills/ in the user's home directory. Copilot auto-loads these instructions."},
+    {domain:2, type:"mc", q:"What does the Copilot SDK enable developers to do?",
+      options:["Train custom Copilot models","Embed the agentic core into any application","Create GitHub Actions workflows","Manage Copilot billing and licenses"],
+      answer:1, explain:"The Copilot SDK embeds the agentic core into any application, allowing developers to build their own agentic experiences powered by Copilot's capabilities."},
+    {domain:2, type:"mc", q:"What distinguishes Agent mode from Ask mode in Copilot?",
+      options:["Agent mode is faster","Agent mode can autonomously plan, edit files, and run terminal commands; Ask mode is read-only Q&A","Ask mode has access to more tools","There is no difference — they are aliases"],
+      answer:1, explain:"Agent mode enables autonomous multi-step workflows including planning, file editing, and terminal command execution (with user approval). Ask mode is strictly read-only Q&A with no code changes."},
+    {domain:2, type:"fill", q:"Copilot ___ mode was a surgical inline editing feature that was deprecated in March 2026.",
+      options:["Edit","Patch","Fix","Modify"], answer:0, explain:"Edit mode allowed surgical inline code edits. It was deprecated in March 2026, with its functionality folded into Agent mode."},
+    {domain:2, type:"tf", q:"Both Copilot Agent extensions and Skillset extensions are implemented as GitHub Apps.",
+      answer:true, explain:"Both types of Copilot Extensions — Agents and Skillsets — are built and registered as GitHub Apps, following the same app model for authentication and permissions."},
+
+    // ═══════ DOMAIN 3: Memory, State & Execution (15 questions) ═══════
+    {domain:3, type:"mc", q:"Which type of memory persists across sessions and is shared via repository artifacts?",
+      options:["Short-term memory","Working memory","Long-term memory","Cache memory"],
+      answer:2, explain:"Long-term memory persists across sessions and is typically stored in durable artifacts like copilot-instructions.md, PR descriptions, or issue comments."},
+    {domain:3, type:"mc", q:"copilot-instructions.md functions primarily as what type of memory?",
+      options:["Short-term memory","External memory","Long-term memory","Episodic memory"],
+      answer:2, explain:"copilot-instructions.md serves as long-term memory for Copilot agents, providing persistent behavioral instructions and context that persists across sessions."},
+    {domain:3, type:"tf", q:"Short-term memory in an agent context refers to information that persists within a single session but is lost when the session ends.",
+      answer:true, explain:"Short-term memory (or working memory) holds information for the current session — the conversation context, recent tool outputs, and intermediate reasoning — but does not persist across sessions."},
+    {domain:3, type:"mc", q:"Which of the following is an example of a durable artifact that serves as external memory?",
+      options:["The agent's current prompt","A PR description documenting decisions made","The model's hidden state","The user's clipboard contents"],
+      answer:1, explain:"PR descriptions, issue comments, commit messages, and wiki pages are durable artifacts that persist beyond any single agent session and serve as external memory."},
+    {domain:3, type:"fill", q:"___ drift occurs when an agent's context gradually becomes stale or inconsistent with the actual state of the codebase.",
+      options:["Context","Goal","Memory","Branch"], answer:0, explain:"Context drift happens when the information in the agent's context becomes outdated or inconsistent with reality, leading to incorrect reasoning and actions."},
+    {domain:3, type:"mc", q:"How can an agent resume interrupted work most reliably?",
+      options:["By replaying the entire conversation from scratch","By reading durable artifacts like issue comments, PR descriptions, and commit messages","By asking the user to re-explain everything","By accessing the model's internal weights"],
+      answer:1, explain:"Durable artifacts provide a reliable record of decisions, plans, and progress that an agent can read to resume work without relying on ephemeral session state."},
+    {domain:3, type:"mc", q:"What is the 'single source of truth' pattern in agent state management?",
+      options:["Using only one model for all agents","Designating one authoritative location for each piece of shared state to prevent conflicts","Running only one agent at a time","Storing all data in a single database table"],
+      answer:1, explain:"The single source of truth pattern designates one authoritative location for each piece of state, preventing conflicts from multiple agents maintaining their own copies."},
+    {domain:3, type:"tf", q:"Memory expiration and pruning strategies are unnecessary because modern LLMs have unlimited context windows.",
+      answer:false, explain:"Context windows are finite and expensive. Memory expiration and pruning are essential to keep the agent's context relevant and within limits, removing outdated or low-value information."},
+    {domain:3, type:"mc", q:"What is the risk of multiple agents sharing state without coordination?",
+      options:["Faster execution","Conflicting or stale context leading to incorrect actions","Reduced API costs","Better observability"],
+      answer:1, explain:"Without coordination, agents can read stale state or make conflicting updates, leading to race conditions, duplicated work, or contradictory changes."},
+    {domain:3, type:"fill", q:"To prevent stale context, agents should ___ their understanding of the codebase state before taking consequential actions.",
+      options:["refresh","encrypt","compress","archive"], answer:0, explain:"Refreshing context — re-reading relevant files, checking branch status, reviewing recent changes — helps prevent actions based on outdated information."},
+    {domain:3, type:"mc", q:"Which scoping strategy limits what portions of a codebase an agent's memory includes?",
+      options:["Global scoping","Memory scoping","Model scoping","Token scoping"],
+      answer:1, explain:"Memory scoping controls which parts of the codebase, conversation history, and external data are included in an agent's context, preventing information overload."},
+    {domain:3, type:"tf", q:"Commit messages are considered durable artifacts that can serve as long-term memory for agents.",
+      answer:true, explain:"Commit messages persist in the Git history indefinitely and document what changes were made and why, serving as a form of long-term memory that agents can read."},
+    {domain:3, type:"mc", q:"What strategy helps detect context drift during long agent sessions?",
+      options:["Increasing the model temperature","Periodic validation checks against the actual state of resources","Reducing the number of tools available","Shortening the system prompt"],
+      answer:1, explain:"Periodic validation — checking actual file contents, branch status, and resource states against what the agent believes — detects when context has drifted from reality."},
+    {domain:3, type:"mc", q:"External memory in the agent architecture typically refers to:",
+      options:["The model's parameter weights","Information stored outside the model in databases, files, or APIs","GPU VRAM","The agent's system prompt"],
+      answer:1, explain:"External memory refers to information stored in external systems — databases, file systems, APIs, wikis — that the agent can read from and write to as needed."},
+    {domain:3, type:"fill", q:"A memory ___ strategy removes outdated or irrelevant information from the agent's context to maintain quality.",
+      options:["pruning","encryption","duplication","broadcasting"], answer:0, explain:"Memory pruning removes stale, redundant, or irrelevant information from the agent's context, keeping it focused and within token limits."},
+
+    // ═══════ DOMAIN 4: Evaluation, Error Analysis & Tuning (20 questions) ═══════
+    {domain:4, type:"mc", q:"What is CodeQL in the context of agent evaluation?",
+      options:["A query language for databases","A semantic code analysis engine that can scan for security vulnerabilities","A CI/CD deployment tool","A model fine-tuning framework"],
+      answer:1, explain:"CodeQL is GitHub's semantic code analysis engine. It scans code for security vulnerabilities and code quality issues, producing results in SARIF format."},
+    {domain:4, type:"mc", q:"SARIF stands for:",
+      options:["Static Analysis Results Interchange Format","Secure Agent Runtime Interface Framework","System Architecture Review and Inspection Format","Standard API Response Integration Format"],
+      answer:0, explain:"SARIF (Static Analysis Results Interchange Format) is a standard JSON format for the output of static analysis tools, used by GitHub code scanning."},
+    {domain:4, type:"tf", q:"Qualitative evaluation signals include metrics like code coverage percentages and test pass rates.",
+      answer:false, explain:"Code coverage and test pass rates are quantitative signals. Qualitative signals include human judgment on code readability, design quality, and whether the solution addresses the actual problem."},
+    {domain:4, type:"mc", q:"When analyzing an agent failure, which root cause category covers the agent misunderstanding the problem?",
+      options:["Tool misuse","Environment issues","Reasoning errors","Context issues"],
+      answer:2, explain:"Reasoning errors occur when the agent misunderstands the problem, makes logical mistakes, or draws incorrect conclusions from the available information."},
+    {domain:4, type:"fill", q:"___ scanning automatically detects exposed credentials like API keys and tokens committed to a repository.",
+      options:["Secret","Code","Dependency","License"], answer:0, explain:"GitHub secret scanning automatically detects exposed credentials, API keys, and tokens in repository contents, preventing accidental exposure."},
+    {domain:4, type:"mc", q:"What does Dependabot do?",
+      options:["Scans for code style violations","Automatically creates PRs to update vulnerable or outdated dependencies","Manages agent permissions","Runs performance benchmarks"],
+      answer:1, explain:"Dependabot monitors project dependencies for known vulnerabilities and outdated versions, automatically creating pull requests to update them."},
+    {domain:4, type:"mc", q:"Which tuning approach involves modifying the instructions given to an agent to improve its behavior?",
+      options:["Model retraining","Instruction revision","Weight adjustment","Architecture redesign"],
+      answer:1, explain:"Instruction revision involves editing the agent's prompts, system messages, or copilot-instructions.md to clarify expectations and correct misunderstandings."},
+    {domain:4, type:"tf", q:"Agent traces (logs of actions, tool calls, and reasoning steps) are useful for failure identification.",
+      answer:true, explain:"Traces provide a detailed record of what the agent did, what tools it called, what results it received, and how it reasoned, making them invaluable for diagnosing failures."},
+    {domain:4, type:"mc", q:"Which root cause category covers situations where a tool returns incorrect data or the agent calls the wrong tool?",
+      options:["Reasoning errors","Tool misuse","Context issues","Environment issues"],
+      answer:1, explain:"Tool misuse covers cases where the agent calls the wrong tool, passes incorrect parameters, or the tool itself returns erroneous results."},
+    {domain:4, type:"mc", q:"What is the purpose of aligning evaluation with development intent?",
+      options:["Ensuring tests match the original requirements and goals, not just implementation details","Making all tests pass regardless of correctness","Reducing the number of evaluation steps","Automating all code reviews"],
+      answer:0, explain:"Aligning evaluation with development intent ensures that success criteria and tests measure whether the agent achieved the actual goal, not just surface-level metrics."},
+    {domain:4, type:"fill", q:"CodeQL results can be uploaded to GitHub in ___ format for integration with code scanning alerts.",
+      options:["SARIF","JSON","XML","CSV"], answer:0, explain:"CodeQL and other static analysis tools upload results in SARIF (Static Analysis Results Interchange Format) to integrate with GitHub's code scanning feature."},
+    {domain:4, type:"mc", q:"When an agent's failure is traced to stale information in its context, this falls under which root cause category?",
+      options:["Reasoning errors","Tool misuse","Context/environment issues","Network errors"],
+      answer:2, explain:"Failures caused by stale, missing, or incorrect context — including outdated file contents, wrong branch state, or environmental misconfigurations — fall under context/environment issues."},
+    {domain:4, type:"tf", q:"Memory refinement as a tuning strategy involves adjusting which information persists in the agent's long-term memory.",
+      answer:true, explain:"Memory refinement involves curating what goes into long-term memory (copilot-instructions.md, pinned context) to ensure the agent has accurate, relevant information for future sessions."},
+    {domain:4, type:"mc", q:"Which evaluation approach combines automated tool results with human judgment?",
+      options:["Fully automated evaluation","Fully manual evaluation","Hybrid evaluation using both quantitative and qualitative signals","Random sampling"],
+      answer:2, explain:"Best practice combines quantitative signals (test results, scanning alerts, metrics) with qualitative human review (code quality, design intent, user experience) for comprehensive evaluation."},
+    {domain:4, type:"mc", q:"What is the first step when diagnosing an agent failure?",
+      options:["Immediately retune the agent's instructions","Examine logs, plans, traces, outputs, and artifacts to identify what went wrong","Switch to a different model","Delete and recreate the agent"],
+      answer:1, explain:"Diagnosis starts with examining evidence: logs, plan outputs, action traces, tool call results, and generated artifacts to understand what the agent did and where it deviated."},
+    {domain:4, type:"fill", q:"Tool access ___ is a tuning strategy that modifies which tools an agent can use based on observed failures.",
+      options:["adjustment","encryption","migration","compilation"], answer:0, explain:"Tool access adjustment involves adding, removing, or restricting tools available to an agent based on observed issues — for example, removing write access if the agent makes harmful changes."},
+    {domain:4, type:"mc", q:"A quantitative success signal for an agent building a feature would be:",
+      options:["The reviewer's opinion on code readability","All automated tests pass and code coverage exceeds the threshold","The agent completed the task quickly","The PR description is well-written"],
+      answer:1, explain:"Test pass rates and coverage thresholds are quantitative (measurable, numeric) signals. Readability opinions and description quality are qualitative judgments."},
+    {domain:4, type:"tf", q:"If an agent repeatedly fails at a task, the only tuning option is to switch to a more powerful model.",
+      answer:false, explain:"Multiple tuning levers exist: instruction revision, memory refinement, tool access adjustment, context scoping, and workflow redesign. Model switching is just one option."},
+    {domain:4, type:"mc", q:"GitHub code scanning integrates with which of the following for automated security analysis?",
+      options:["CodeQL, third-party SARIF uploads, and Dependabot","Only CodeQL","Only Dependabot","Only secret scanning"],
+      answer:0, explain:"GitHub code scanning integrates with CodeQL (GitHub's own engine), third-party tools that produce SARIF output, and Dependabot for dependency vulnerabilities."},
+    {domain:4, type:"mc", q:"What distinguishes a reasoning error from a tool misuse error?",
+      options:["Reasoning errors are cheaper to fix","Reasoning errors involve flawed logic or misunderstanding; tool misuse involves incorrect tool selection or parameters","There is no difference","Tool misuse only occurs with MCP tools"],
+      answer:1, explain:"Reasoning errors stem from the agent's logic and understanding, while tool misuse stems from incorrect interaction with tools — wrong tool chosen, wrong parameters, or misinterpreting results."},
+
+    // ═══════ DOMAIN 5: Multi-Agent Coordination (20 questions) ═══════
+    {domain:5, type:"mc", q:"In a sequential orchestration pattern, agents:",
+      options:["Run simultaneously on the same task","Execute one after another, each building on the previous agent's output","Compete to complete the task first","Operate independently with no coordination"],
+      answer:1, explain:"Sequential orchestration chains agents in order, where each agent's output becomes the next agent's input, like a pipeline."},
+    {domain:5, type:"mc", q:"What is the fan-out/fan-in orchestration pattern?",
+      options:["A single agent that fans out its own work over time","Work is distributed to multiple agents in parallel (fan-out), then results are collected and combined (fan-in)","Agents fan out errors to a central logger","A hierarchical chain of command"],
+      answer:1, explain:"Fan-out/fan-in distributes subtasks to multiple agents running in parallel, then collects and combines their results into a unified output."},
+    {domain:5, type:"tf", q:"In hierarchical orchestration, a coordinator agent delegates tasks to worker agents and manages their outputs.",
+      answer:true, explain:"Hierarchical orchestration uses a coordinator (or manager) agent that breaks down work, delegates subtasks to specialized worker agents, and aggregates their results."},
+    {domain:5, type:"mc", q:"What is the primary purpose of agent isolation in multi-agent systems?",
+      options:["Improving model performance","Preventing agents from interfering with each other's work","Reducing costs","Simplifying deployment"],
+      answer:1, explain:"Agent isolation (separate branches, sandboxed environments) prevents agents from interfering with each other's changes, avoiding merge conflicts and contradictory outputs."},
+    {domain:5, type:"fill", q:"When multiple agents work on the same codebase, each agent should work on a separate ___ to isolate their changes.",
+      options:["branch","model","server","database"], answer:0, explain:"Branch isolation ensures each agent's changes are contained, preventing conflicts and enabling independent review before merging."},
+    {domain:5, type:"mc", q:"Conflict detection in multi-agent systems should identify which of the following?",
+      options:["Merge conflicts, duplicated effort, and contradictory outputs","Only merge conflicts","Only duplicated files","Only syntax errors"],
+      answer:0, explain:"Comprehensive conflict detection watches for merge conflicts (same files modified), duplicated effort (same task done twice), and contradictory outputs (conflicting changes)."},
+    {domain:5, type:"mc", q:"What is an observability artifact in multi-agent coordination?",
+      options:["A log entry","A documented record of an agent's decisions, handoffs, and outcomes that can be reviewed post-hoc","A model checkpoint","A compiled binary"],
+      answer:1, explain:"Observability artifacts are documented records — logs, decision traces, handoff records, outcome summaries — that enable understanding and debugging of multi-agent interactions."},
+    {domain:5, type:"tf", q:"In a parallel orchestration pattern, all agents work simultaneously on independent subtasks.",
+      answer:true, explain:"Parallel orchestration runs multiple agents concurrently on independent subtasks, improving throughput when tasks don't have sequential dependencies."},
+    {domain:5, type:"mc", q:"Which recovery pattern involves reverting an agent's changes when it fails?",
+      options:["Retry","Human-in-the-loop","Rollback","Graceful degradation"],
+      answer:2, explain:"Rollback recovery reverts the failed agent's changes (e.g., reverting commits, closing PRs) to return the system to a known good state."},
+    {domain:5, type:"mc", q:"What is the 'human-in-the-loop' recovery pattern?",
+      options:["Humans replace the agent entirely","When an agent fails or faces uncertainty, it escalates to a human for decision-making","Humans write all the code and agents review it","Agents train on human feedback"],
+      answer:1, explain:"Human-in-the-loop recovery involves the agent pausing and escalating to a human when it encounters a failure it cannot handle or a decision requiring human judgment."},
+    {domain:5, type:"fill", q:"Decision and ___ documentation is essential for understanding how work was transferred between agents.",
+      options:["handoff","encryption","compilation","deployment"], answer:0, explain:"Handoff documentation records how work was transferred between agents — what was passed, what state was shared, and what the receiving agent was expected to do."},
+    {domain:5, type:"mc", q:"Which failure type in multi-agent systems refers to an agent that stops making progress without crashing?",
+      options:["Crash","Timeout","Stall","Rollback"],
+      answer:2, explain:"A stall occurs when an agent stops making meaningful progress — it may be running but stuck in a loop or waiting indefinitely — without actually crashing."},
+    {domain:5, type:"mc", q:"Rolling updates vs. blue-green deployment for agents: what is the key difference?",
+      options:["Rolling updates are faster","Rolling updates gradually replace agent instances one by one; blue-green switches all traffic from old to new at once","Blue-green is cheaper","There is no difference"],
+      answer:1, explain:"Rolling updates gradually replace old agent instances with new ones, while blue-green deploys the new version alongside the old and switches all traffic at once."},
+    {domain:5, type:"tf", q:"Post-hoc analysis of multi-agent interactions is unnecessary if all agents completed successfully.",
+      answer:false, explain:"Post-hoc analysis is valuable even for successful runs — it can reveal inefficiencies, near-misses, coordination overhead, or opportunities for optimization."},
+    {domain:5, type:"mc", q:"What does preserving auditability mean in multi-agent systems?",
+      options:["Keeping financial records","Ensuring that all agent actions, decisions, and interactions can be traced and reviewed after the fact","Maintaining backup copies of all code","Recording video of all agent sessions"],
+      answer:1, explain:"Auditability means maintaining a clear, traceable record of every agent action, decision, and interaction so the entire multi-agent workflow can be reviewed and understood."},
+    {domain:5, type:"mc", q:"What is the agent lifecycle in the context of managing a fleet of agents?",
+      options:["The plan-act-evaluate cycle","Adding, updating, and retiring agents over time as needs change","The time from model training to deployment","The lifecycle of a single conversation"],
+      answer:1, explain:"Agent lifecycle management covers the full span of an agent's existence: adding new agents, updating their configurations and capabilities, and retiring agents that are no longer needed."},
+    {domain:5, type:"fill", q:"___ orchestration uses a manager agent that delegates subtasks to specialized worker agents.",
+      options:["Hierarchical","Sequential","Parallel","Flat"], answer:0, explain:"Hierarchical orchestration has a coordinator agent at the top that plans, delegates to worker agents, and synthesizes results."},
+    {domain:5, type:"mc", q:"Which of the following is a sign of coordination failure in a multi-agent system?",
+      options:["Fast task completion","Two agents making contradictory changes to the same file","Clean merge with no conflicts","All tests passing"],
+      answer:1, explain:"Contradictory changes to the same file indicate a coordination failure — agents were not properly isolated or their tasks were not properly divided."},
+    {domain:5, type:"tf", q:"Sandboxed environments for agents provide stronger isolation than branch-based isolation alone.",
+      answer:true, explain:"Sandboxed environments provide compute and resource isolation in addition to code isolation, preventing agents from interfering with each other's runtime environment, not just their code changes."},
+    {domain:5, type:"mc", q:"Graceful degradation as a recovery pattern means:",
+      options:["The system shuts down completely on any error","The system continues operating with reduced functionality when one agent fails","The system ignores all errors","The system retries failed operations forever"],
+      answer:1, explain:"Graceful degradation allows the overall multi-agent system to continue operating with reduced capability when one agent fails, rather than failing entirely."},
+
+    // ═══════ DOMAIN 6: Guardrails & Accountability (15 questions) ═══════
+    {domain:6, type:"mc", q:"What are the three main categories of risk classification for agent actions?",
+      options:["Low, medium, high","Fast, slow, blocked","Operational, security, and compliance","Read, write, delete"],
+      answer:2, explain:"Agent actions are classified by risk type: operational risks (breaking functionality), security risks (exposing data, privilege escalation), and compliance risks (violating policies or regulations)."},
+    {domain:6, type:"mc", q:"Autonomy level 0 means:",
+      options:["The agent is fully autonomous","The agent has no autonomy; all actions are human-performed","The agent can suggest but not execute","The agent operates with supervisory oversight"],
+      answer:1, explain:"Level 0 is fully human-controlled — the agent provides no autonomous actions. The spectrum goes from 0 (no autonomy) to 4 (full autonomy)."},
+    {domain:6, type:"tf", q:"CODEOWNERS files can be used as a guardrail to require specific reviewers for changes to sensitive paths.",
+      answer:true, explain:"CODEOWNERS designates required reviewers for specific file paths. When an agent's PR modifies those paths, the designated owners must approve, providing a human review guardrail."},
+    {domain:6, type:"mc", q:"What is the principle of 'least-privilege access' for agents?",
+      options:["Agents should have access to everything for maximum flexibility","Agents should be granted only the minimum permissions needed for their specific task","Agents should have no access at all","Least-privilege means using the cheapest model"],
+      answer:1, explain:"Least-privilege means granting only the minimum permissions necessary for the agent's specific task, reducing the blast radius if the agent makes a mistake or is compromised."},
+    {domain:6, type:"fill", q:"___ protection rules prevent agents from pushing directly to critical branches without going through a review process.",
+      options:["Branch","File","Network","Model"], answer:0, explain:"Branch protection rules enforce that changes to protected branches (like main) must go through pull requests with required reviews, checks, and approvals."},
+    {domain:6, type:"mc", q:"Which GitHub feature defines sets of rules that can enforce policies across multiple repositories?",
+      options:["Branch protection rules only","Repository rulesets","CODEOWNERS","GitHub Actions"],
+      answer:1, explain:"Repository rulesets allow defining and enforcing consistent policies (branch protections, required checks, etc.) across multiple repositories from a central configuration."},
+    {domain:6, type:"mc", q:"When should explicit authorization be required for an agent action?",
+      options:["Never; agents should be fully autonomous","Only for read operations","For irreversible or high-impact actions like deleting resources or deploying to production","Only when the agent encounters an error"],
+      answer:2, explain:"Irreversible or high-impact actions (deletions, production deployments, security changes) should require explicit human authorization to prevent unrecoverable mistakes."},
+    {domain:6, type:"tf", q:"Deployment gates and environment protection rules can prevent agents from deploying to production without approval.",
+      answer:true, explain:"Deployment gates (required reviewers, wait timers) and environment protection rules in GitHub Actions prevent automated deployments to sensitive environments without explicit approval."},
+    {domain:6, type:"mc", q:"How should organizations balance velocity with safety when using AI agents?",
+      options:["Always prioritize speed over safety","Always block agents from taking any action","Right-size human interventions based on the risk level of the action","Safety and velocity cannot coexist"],
+      answer:2, explain:"The key is right-sizing: low-risk actions can be automated freely, while high-risk actions require proportional human oversight. This balances development speed with appropriate safety."},
+    {domain:6, type:"mc", q:"Scoped tokens for agents means:",
+      options:["Tokens that expire after a set time","Tokens with permissions limited to specific repositories, resources, or operations","Tokens shared across all agents","Tokens that only work on weekdays"],
+      answer:1, explain:"Scoped tokens are configured with permissions limited to specific repositories, resources, or operations, following the principle of least privilege."},
+    {domain:6, type:"fill", q:"___ checks are automated validation steps that must pass before a PR can be merged, serving as automated guardrails.",
+      options:["Required","Optional","Manual","Scheduled"], answer:0, explain:"Required checks (CI tests, linting, security scans) must pass before merging, providing automated guardrails that apply equally to human and agent contributions."},
+    {domain:6, type:"mc", q:"Responsible AI standards in the context of GitHub Copilot agents include:",
+      options:["Only performance metrics","Transparency, accountability, fairness, and safety considerations for agent behavior","Only model accuracy","Only cost efficiency"],
+      answer:1, explain:"Responsible AI encompasses transparency (explaining agent actions), accountability (clear ownership), fairness (avoiding bias), and safety (preventing harmful outcomes)."},
+    {domain:6, type:"tf", q:"At autonomy level 4, agents operate with full independence and no human oversight is needed.",
+      answer:true, explain:"Autonomy level 4 represents full autonomy where the agent plans, acts, and evaluates independently. This level is appropriate only for low-risk, well-understood tasks with robust guardrails."},
+    {domain:6, type:"mc", q:"Which of the following actions would most likely require human judgment before an agent proceeds?",
+      options:["Reading a file from the repository","Running a unit test","Deleting a production database table","Creating a local branch"],
+      answer:2, explain:"Deleting a production database table is irreversible and high-impact, clearly requiring human judgment and explicit authorization before the agent proceeds."},
+    {domain:6, type:"mc", q:"What is the role of required checks in the agent guardrail framework?",
+      options:["They slow down development unnecessarily","They provide automated verification that agent changes meet quality and security standards before merging","They are only useful for human contributors","They replace the need for code review"],
+      answer:1, explain:"Required checks (CI, tests, security scans) automatically verify that changes — whether from humans or agents — meet quality and security standards before they can be merged."},
+
+    // ═══════ TERM MATCH QUESTIONS ═══════
+    {domain:1, type:"match", q:"Match each agent architecture concept to its definition.",
+      pairs:[
+        {term:"Goal Drift", def:"Agent gradually deviates from its original objective"},
+        {term:"Context Pollution", def:"Irrelevant information accumulating in the context window"},
+        {term:"Over-Autonomy", def:"Agent acts without appropriate human checkpoints"},
+        {term:"Scope Creep", def:"Agent expands beyond its defined task boundaries"},
+        {term:"Missing Traceability", def:"Actions cannot be linked back to decisions or plans"}
+      ], explain:"These five anti-patterns represent the most common failure modes in agent architecture design."},
+    {domain:2, type:"match", q:"Match each MCP concept to its description.",
+      pairs:[
+        {term:"MCP", def:"Model Context Protocol — standard for connecting agents to tools"},
+        {term:"stdio transport", def:"Communication method used by local MCP servers"},
+        {term:"SSE transport", def:"Communication method used by remote MCP servers"},
+        {term:"MCP Registry", def:"HTTPS endpoint listing available MCP servers"},
+        {term:"Allow List", def:"Org-level control over which MCP servers agents can use"}
+      ], explain:"MCP provides a standardized way to connect agents to tools, with local (stdio) and remote (SSE) transport options, managed through registries and allow lists."},
+    {domain:2, type:"match", q:"Match each Copilot extension or mode to its description.",
+      pairs:[
+        {term:"Copilot Skillset", def:"Lightweight API endpoint extension"},
+        {term:"Copilot Agent Extension", def:"Full control over request/response"},
+        {term:"Agent Skills", def:"Folders with instructions Copilot auto-loads"},
+        {term:"Copilot SDK", def:"Embeds agentic core in any app"},
+        {term:"Ask Mode", def:"Read-only Q&A, no code changes"},
+        {term:"Agent Mode", def:"Autonomous multi-step with tool access"}
+      ], explain:"Copilot Extensions (Agents and Skillsets) extend Copilot via GitHub Apps. Agent Skills provide auto-loaded instructions. The SDK embeds agentic capabilities. Ask and Agent modes define the level of autonomy."},
+    {domain:3, type:"match", q:"Match each memory type to its characteristic.",
+      pairs:[
+        {term:"Short-term Memory", def:"Exists only within a single session"},
+        {term:"Long-term Memory", def:"Persists across sessions via copilot-instructions.md"},
+        {term:"External Memory", def:"Stored in databases, APIs, or file systems"},
+        {term:"Durable Artifacts", def:"PR descriptions, commit messages, issue comments"},
+        {term:"Context Drift", def:"Working context becomes stale or inconsistent"}
+      ], explain:"Understanding memory types helps in designing agents that can maintain relevant context and resume work reliably."},
+    {domain:4, type:"match", q:"Match each evaluation tool to its purpose.",
+      pairs:[
+        {term:"CodeQL", def:"Semantic code analysis for security vulnerabilities"},
+        {term:"Dependabot", def:"Automated dependency vulnerability detection and updates"},
+        {term:"Secret Scanning", def:"Detects exposed credentials in repository content"},
+        {term:"SARIF", def:"Standard format for static analysis results"},
+        {term:"Required Checks", def:"Automated gates that must pass before PR merge"}
+      ], explain:"GitHub provides multiple automated evaluation tools that work together to assess agent-generated code quality and security."},
+    {domain:5, type:"match", q:"Match each orchestration pattern to its description.",
+      pairs:[
+        {term:"Sequential", def:"Agents execute one after another in a chain"},
+        {term:"Parallel", def:"Agents work simultaneously on independent subtasks"},
+        {term:"Hierarchical", def:"Coordinator agent delegates to specialized workers"},
+        {term:"Fan-out/Fan-in", def:"Distribute work widely, then collect and combine results"},
+        {term:"Human-in-the-loop", def:"Agent escalates to human when facing uncertainty"}
+      ], explain:"Orchestration patterns define how multiple agents coordinate their work, from simple chains to complex hierarchies."},
+    {domain:6, type:"match", q:"Match each guardrail mechanism to its function.",
+      pairs:[
+        {term:"Branch Protection", def:"Prevents direct pushes to critical branches"},
+        {term:"CODEOWNERS", def:"Requires specific reviewers for changes to sensitive paths"},
+        {term:"Rulesets", def:"Enforce policies consistently across multiple repositories"},
+        {term:"Deployment Gates", def:"Require approval before deploying to sensitive environments"},
+        {term:"Scoped Tokens", def:"Permissions limited to specific resources and operations"}
+      ], explain:"Multiple guardrail mechanisms work together to ensure agents operate safely within defined boundaries."}
+  ];
+
+  // ════════════════════════════════════════════
+  //  STATE
+  // ════════════════════════════════════════════
+
+  var STORAGE_KEY = "gh600_game_stats";
+
+  function defaultStats() {
+    return {level:1, xp:0, totalCorrect:0, totalAnswered:0, streak:0, bestStreak:0, domainScores:{1:{c:0,t:0},2:{c:0,t:0},3:{c:0,t:0},4:{c:0,t:0},5:{c:0,t:0},6:{c:0,t:0}}, totalPoints:0};
+  }
+
+  function loadStats() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        // migrate old format
+        if (!s.domainScores) s.domainScores = defaultStats().domainScores;
+        for (var d = 1; d <= 6; d++) {
+          if (!s.domainScores[d]) s.domainScores[d] = {c:0, t:0};
+        }
+        if (typeof s.totalPoints !== "number") s.totalPoints = 0;
+        return s;
+      }
+    } catch(e) {}
+    return defaultStats();
+  }
+
+  function saveStats(s) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e) {}
+  }
+
+  var stats = loadStats();
+
+  // Current game state
+  var currentMode = null;
+  var currentDomain = 0; // 0 = all
+  var gameQuestions = [];
+  var currentIndex = 0;
+  var roundCorrect = 0;
+  var roundTotal = 0;
+  var roundXP = 0;
+  var roundDomainScores = {};
+  var survivalLives = 3;
+  var timerInterval = null;
+  var timerRemaining = 0;
+  var answered = false;
+
+  // Match mode state
+  var matchRound = 0;
+  var matchTotalRounds = 5;
+  var matchSelectedTerm = null;
+  var matchPairCount = 0;
+  var matchCorrectPairs = 0;
+  var matchCurrentQ = null;
+
+  // ════════════════════════════════════════════
+  //  AUDIO (Web Audio API beeps)
+  // ════════════════════════════════════════════
+
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    return audioCtx;
+  }
+
+  function playBeep(freq, duration, type) {
+    var ctx = getAudioCtx();
+    if (!ctx) return;
+    try {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = type || "sine";
+      osc.frequency.value = freq;
+      gain.gain.value = 0.08;
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function soundCorrect() { playBeep(880, 0.15, "sine"); setTimeout(function(){ playBeep(1100, 0.2, "sine"); }, 100); }
+  function soundIncorrect() { playBeep(200, 0.3, "square"); }
+  function soundLevelUp() { playBeep(523, 0.1, "sine"); setTimeout(function(){ playBeep(659, 0.1, "sine"); }, 100); setTimeout(function(){ playBeep(784, 0.15, "sine"); }, 200); setTimeout(function(){ playBeep(1047, 0.3, "sine"); }, 300); }
+  function soundMatchCorrect() { playBeep(660, 0.1, "sine"); }
+  function soundMatchWrong() { playBeep(220, 0.15, "square"); }
+
+  // ════════════════════════════════════════════
+  //  DOM REFERENCES
+  // ════════════════════════════════════════════
+
+  var $id = document.getElementById.bind(document);
+
+  var homeScreen = $id("homeScreen");
+  var gameArea = $id("gameArea");
+  var resultsScreen = $id("resultsScreen");
+  var domainSelectorArea = $id("domainSelectorArea");
+  var startGameBtn = $id("startGameBtn");
+
+  var levelNum = $id("levelNum");
+  var xpCurrent = $id("xpCurrent");
+  var xpTarget = $id("xpTarget");
+  var xpFill = $id("xpFill");
+  var streakDisplay = $id("streakDisplay");
+  var streakCount = $id("streakCount");
+  var totalScoreBadge = $id("totalScoreBadge");
+  var survivalLivesEl = $id("survivalLives");
+
+  var timerText = $id("timerText");
+  var timerBar = $id("timerBar");
+  var timerFillEl = $id("timerFill");
+  var progressText = $id("progressText");
+  var progressFill = $id("progressFill");
+
+  var questionCard = $id("questionCard");
+  var domainIndicator = $id("domainIndicator");
+  var qTypeBadge = $id("qTypeBadge");
+  var questionText = $id("questionText");
+  var optionList = $id("optionList");
+  var matchContainer = $id("matchContainer");
+  var matchTermsEl = $id("matchTerms");
+  var matchDefsEl = $id("matchDefs");
+  var answerFeedback = $id("answerFeedback");
+  var feedbackHeader = $id("feedbackHeader");
+  var feedbackExplanation = $id("feedbackExplanation");
+  var nextBtn = $id("nextBtn");
+
+  // ════════════════════════════════════════════
+  //  HUD UPDATE
+  // ════════════════════════════════════════════
+
+  function updateHUD() {
+    levelNum.textContent = stats.level;
+    var xpInLevel = stats.xp % 200;
+    xpCurrent.textContent = xpInLevel + " XP";
+    xpTarget.textContent = "/ 200 XP to Level " + (stats.level + 1);
+    xpFill.style.width = ((xpInLevel / 200) * 100) + "%";
+
+    streakCount.textContent = stats.streak;
+    if (stats.streak >= 3) {
+      streakDisplay.classList.add("on-fire");
+    } else {
+      streakDisplay.classList.remove("on-fire");
+    }
+
+    totalScoreBadge.textContent = stats.totalPoints + " pts";
+  }
+
+  function showXPPopup(amount) {
+    var popup = document.createElement("div");
+    popup.className = "xp-popup";
+    popup.textContent = "+" + amount + " XP";
+    document.body.appendChild(popup);
+    setTimeout(function() { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 1600);
+  }
+
+  function addXP(amount) {
+    var oldLevel = stats.level;
+    stats.xp += amount;
+    stats.level = Math.floor(stats.xp / 200) + 1;
+    stats.totalPoints += amount;
+    roundXP += amount;
+    saveStats(stats);
+    updateHUD();
+    showXPPopup(amount);
+    if (stats.level > oldLevel) {
+      soundLevelUp();
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  SHUFFLE
+  // ════════════════════════════════════════════
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  // ════════════════════════════════════════════
+  //  QUESTION SELECTION
+  // ════════════════════════════════════════════
+
+  function getQuestions(domain, count, excludeMatch) {
+    var pool = QUESTIONS.filter(function(q) {
+      if (excludeMatch && q.type === "match") return false;
+      return domain === 0 || q.domain === domain;
+    });
+    pool = shuffle(pool);
+    return pool.slice(0, count);
+  }
+
+  function getMatchQuestions(domain, count) {
+    var pool = QUESTIONS.filter(function(q) {
+      return q.type === "match" && (domain === 0 || q.domain === domain);
+    });
+    pool = shuffle(pool);
+    return pool.slice(0, count);
+  }
+
+  // ════════════════════════════════════════════
+  //  MODE SELECTION
+  // ════════════════════════════════════════════
+
+  document.querySelectorAll(".mode-card").forEach(function(card) {
+    card.addEventListener("click", function() {
+      document.querySelectorAll(".mode-card").forEach(function(c) { c.classList.remove("selected"); });
+      card.classList.add("selected");
+      currentMode = card.getAttribute("data-mode");
+
+      if (currentMode === "deepdive") {
+        domainSelectorArea.classList.remove("hidden");
+        // Reset to show domain selector without "all domains" as default for deep dive
+      } else if (currentMode === "termmatch") {
+        domainSelectorArea.classList.remove("hidden");
+      } else {
+        domainSelectorArea.classList.remove("hidden");
+      }
+    });
+  });
+
+  document.querySelectorAll(".domain-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll(".domain-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      currentDomain = parseInt(btn.getAttribute("data-domain"), 10);
+    });
+  });
+
+  startGameBtn.addEventListener("click", function() {
+    if (!currentMode) return;
+    startGame();
+  });
+
+  // ════════════════════════════════════════════
+  //  START GAME
+  // ════════════════════════════════════════════
+
+  function startGame() {
+    roundCorrect = 0;
+    roundTotal = 0;
+    roundXP = 0;
+    currentIndex = 0;
+    answered = false;
+    roundDomainScores = {};
+    for (var d = 1; d <= 6; d++) roundDomainScores[d] = {c:0, t:0};
+
+    homeScreen.style.display = "none";
+    resultsScreen.classList.remove("active");
+    gameArea.classList.add("active");
+    $id("statsSection").style.display = "none";
+
+    // Reset survival
+    survivalLives = 3;
+    survivalLivesEl.classList.add("hidden");
+    $id("life1").classList.remove("lost");
+    $id("life2").classList.remove("lost");
+    $id("life3").classList.remove("lost");
+
+    // Timer defaults
+    timerText.classList.add("hidden");
+    timerBar.classList.add("hidden");
+
+    if (currentMode === "quickfire") {
+      gameQuestions = getQuestions(currentDomain, 10, true);
+      timerText.classList.remove("hidden");
+      timerBar.classList.remove("hidden");
+    } else if (currentMode === "deepdive") {
+      var dom = currentDomain === 0 ? Math.ceil(Math.random() * 6) : currentDomain;
+      gameQuestions = getQuestions(dom, 15, true);
+    } else if (currentMode === "survival") {
+      gameQuestions = getQuestions(currentDomain, 50, true); // large pool
+      survivalLivesEl.classList.remove("hidden");
+      timerText.classList.remove("hidden");
+      timerBar.classList.remove("hidden");
+    } else if (currentMode === "termmatch") {
+      gameQuestions = getMatchQuestions(currentDomain, matchTotalRounds);
+      if (gameQuestions.length === 0) {
+        // fallback if no match questions for domain
+        gameQuestions = getMatchQuestions(0, matchTotalRounds);
+      }
+      matchRound = 0;
+      startMatchRound();
+      return;
+    }
+
+    if (gameQuestions.length === 0) {
+      endGame();
+      return;
+    }
+
+    showQuestion();
+  }
+
+  // ════════════════════════════════════════════
+  //  SHOW QUESTION (MC / TF / FILL)
+  // ════════════════════════════════════════════
+
+  function showQuestion() {
+    answered = false;
+    clearTimer();
+    nextBtn.classList.add("hidden");
+    answerFeedback.className = "answer-feedback";
+    questionCard.classList.remove("correct-flash", "incorrect-shake");
+    optionList.classList.remove("hidden");
+    matchContainer.classList.add("hidden");
+
+    var q = gameQuestions[currentIndex];
+    if (!q) { endGame(); return; }
+
+    // Domain indicator
+    var dColor = DOMAIN_COLORS[q.domain] || "var(--text-muted)";
+    domainIndicator.style.background = dColor.replace("var(--", "rgba(").replace(")", ", 0.15)");
+    domainIndicator.style.color = dColor;
+    domainIndicator.style.borderLeft = "3px solid " + dColor;
+    domainIndicator.textContent = "D" + q.domain + " " + DOMAIN_NAMES[q.domain];
+
+    // Type badge
+    var typeLabels = {mc:"Multiple Choice", tf:"True / False", fill:"Fill in Blank"};
+    qTypeBadge.textContent = typeLabels[q.type] || q.type;
+
+    // Question text
+    questionText.textContent = q.q;
+
+    // Progress
+    var total = currentMode === "survival" ? "?" : gameQuestions.length;
+    progressText.textContent = (currentIndex + 1) + " / " + total;
+    if (currentMode !== "survival") {
+      progressFill.style.width = (((currentIndex + 1) / gameQuestions.length) * 100) + "%";
+    } else {
+      progressFill.style.width = "0%";
+    }
+
+    // Build options
+    optionList.textContent = "";
+
+    if (q.type === "tf") {
+      buildOption(0, "True", q);
+      buildOption(1, "False", q);
+    } else {
+      // mc or fill — shuffle option order
+      var indices = [0, 1, 2, 3];
+      var shuffled = shuffle(indices);
+      shuffled.forEach(function(origIdx, displayIdx) {
+        buildOption(origIdx, q.options[origIdx], q, displayIdx);
+      });
+    }
+
+    // Start timer for quickfire and survival
+    if (currentMode === "quickfire") {
+      startTimer(15);
+    } else if (currentMode === "survival") {
+      // Escalating difficulty: timer shrinks as you progress
+      // Starts at 20s, loses 1s every 3 questions answered, floor of 8s
+      var survivalTime = Math.max(8, 20 - Math.floor(roundTotal / 3));
+      startTimer(survivalTime);
+    }
+  }
+
+  function buildOption(origIdx, text, q, displayIdx) {
+    var li = document.createElement("li");
+    li.className = "option-item";
+    li.setAttribute("data-idx", origIdx);
+
+    var letter = document.createElement("span");
+    letter.className = "option-letter";
+    if (q.type === "tf") {
+      letter.textContent = origIdx === 0 ? "T" : "F";
+    } else {
+      var letters = ["A","B","C","D"];
+      letter.textContent = letters[displayIdx !== undefined ? displayIdx : origIdx];
+    }
+
+    var span = document.createElement("span");
+    span.textContent = text;
+
+    li.appendChild(letter);
+    li.appendChild(span);
+
+    li.addEventListener("click", function() {
+      if (answered) return;
+      handleAnswer(origIdx, q, li);
+    });
+
+    optionList.appendChild(li);
+  }
+
+  // ════════════════════════════════════════════
+  //  HANDLE ANSWER
+  // ════════════════════════════════════════════
+
+  function handleAnswer(selectedIdx, q, selectedEl) {
+    if (answered) return;
+    answered = true;
+    clearTimer();
+
+    var isCorrect = false;
+
+    if (q.type === "tf") {
+      var selectedBool = selectedIdx === 0; // 0 = True, 1 = False
+      isCorrect = selectedBool === q.answer;
+    } else {
+      isCorrect = selectedIdx === q.answer;
+    }
+
+    roundTotal++;
+    roundDomainScores[q.domain].t++;
+
+    if (isCorrect) {
+      roundCorrect++;
+      roundDomainScores[q.domain].c++;
+      stats.totalCorrect++;
+      stats.streak++;
+      if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
+      stats.domainScores[q.domain].c++;
+      stats.domainScores[q.domain].t++;
+
+      selectedEl.classList.add("correct");
+      questionCard.classList.add("correct-flash");
+      soundCorrect();
+
+      // XP calculation
+      var xp = 20;
+      if (currentMode === "quickfire" && timerRemaining > 0) {
+        xp += Math.round(timerRemaining * 2); // speed bonus
+      }
+      if (stats.streak >= 5) xp += 10;
+      else if (stats.streak >= 3) xp += 5;
+      addXP(xp);
+
+      showFeedback(true, q.explain);
+    } else {
+      stats.streak = 0;
+      stats.domainScores[q.domain].t++;
+
+      selectedEl.classList.add("incorrect");
+      questionCard.classList.add("incorrect-shake");
+      soundIncorrect();
+
+      // Show correct answer
+      var items = optionList.querySelectorAll(".option-item");
+      items.forEach(function(item) {
+        var idx = parseInt(item.getAttribute("data-idx"), 10);
+        if (q.type === "tf") {
+          var isTrueItem = idx === 0;
+          if (isTrueItem === q.answer) item.classList.add("correct");
+        } else {
+          if (idx === q.answer) item.classList.add("correct");
+        }
+      });
+
+      // Survival mode: lose a life
+      if (currentMode === "survival") {
+        survivalLives--;
+        var lifeEl = $id("life" + (3 - survivalLives));
+        if (lifeEl) lifeEl.classList.add("lost");
+      }
+
+      showFeedback(false, q.explain);
+    }
+
+    stats.totalAnswered++;
+    saveStats(stats);
+    updateHUD();
+
+    nextBtn.classList.remove("hidden");
+  }
+
+  function showFeedback(correct, explanation) {
+    answerFeedback.className = "answer-feedback " + (correct ? "correct" : "incorrect");
+
+    feedbackHeader.textContent = "";
+    feedbackHeader.className = "feedback-header " + (correct ? "correct" : "incorrect");
+    var icon = document.createElement("span");
+    icon.textContent = correct ? "✓ Correct!" : "✗ Incorrect";
+    feedbackHeader.appendChild(icon);
+
+    feedbackExplanation.textContent = explanation || "";
+  }
+
+  // ════════════════════════════════════════════
+  //  TIMER
+  // ════════════════════════════════════════════
+
+  function startTimer(seconds) {
+    timerRemaining = seconds;
+    var total = seconds;
+    updateTimerDisplay(total);
+
+    timerInterval = setInterval(function() {
+      timerRemaining -= 0.1;
+      if (timerRemaining <= 0) {
+        timerRemaining = 0;
+        clearTimer();
+        // Time's up — auto-fail
+        if (!answered) {
+          answered = true;
+          var q = gameQuestions[currentIndex];
+          roundTotal++;
+          roundDomainScores[q.domain].t++;
+          stats.totalAnswered++;
+          stats.domainScores[q.domain].t++;
+          stats.streak = 0;
+          saveStats(stats);
+          updateHUD();
+          soundIncorrect();
+
+          // Show correct answer
+          var items = optionList.querySelectorAll(".option-item");
+          items.forEach(function(item) {
+            var idx = parseInt(item.getAttribute("data-idx"), 10);
+            if (q.type === "tf") {
+              if ((idx === 0) === q.answer) item.classList.add("correct");
+            } else {
+              if (idx === q.answer) item.classList.add("correct");
+            }
+          });
+
+          // Survival mode: lose a life on timeout
+          if (currentMode === "survival") {
+            survivalLives--;
+            var lifeEl = $id("life" + (3 - survivalLives));
+            if (lifeEl) lifeEl.classList.add("lost");
+          }
+
+          showFeedback(false, "Time's up! " + (q.explain || ""));
+          nextBtn.classList.remove("hidden");
+        }
+      }
+      updateTimerDisplay(total);
+    }, 100);
+  }
+
+  function updateTimerDisplay(total) {
+    var pct = (timerRemaining / total) * 100;
+    timerFillEl.style.width = pct + "%";
+
+    timerFillEl.classList.remove("warning", "danger");
+    timerText.classList.remove("warning", "danger");
+
+    if (timerRemaining <= 5) {
+      timerFillEl.classList.add("danger");
+      timerText.classList.add("danger");
+    } else if (timerRemaining <= 10) {
+      timerFillEl.classList.add("warning");
+      timerText.classList.add("warning");
+    }
+
+    timerText.textContent = timerRemaining.toFixed(1) + "s";
+  }
+
+  function clearTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  NEXT QUESTION
+  // ════════════════════════════════════════════
+
+  nextBtn.addEventListener("click", function() {
+    currentIndex++;
+
+    // Check end conditions
+    if (currentMode === "survival" && survivalLives <= 0) {
+      endGame();
+      return;
+    }
+
+    if (currentMode === "survival" && currentIndex >= gameQuestions.length) {
+      // Refill pool for survival
+      var more = getQuestions(currentDomain, 20, true);
+      gameQuestions = gameQuestions.concat(more);
+    }
+
+    if (currentMode !== "survival" && currentIndex >= gameQuestions.length) {
+      endGame();
+      return;
+    }
+
+    showQuestion();
+  });
+
+  // ════════════════════════════════════════════
+  //  TERM MATCH MODE
+  // ════════════════════════════════════════════
+
+  function startMatchRound() {
+    if (matchRound >= gameQuestions.length) {
+      endGame();
+      return;
+    }
+
+    matchCurrentQ = gameQuestions[matchRound];
+    matchSelectedTerm = null;
+    matchPairCount = 0;
+    matchCorrectPairs = 0;
+
+    optionList.classList.add("hidden");
+    matchContainer.classList.remove("hidden");
+    nextBtn.classList.add("hidden");
+    answerFeedback.className = "answer-feedback";
+    questionCard.classList.remove("correct-flash", "incorrect-shake");
+
+    // Header
+    var dColor = DOMAIN_COLORS[matchCurrentQ.domain] || "var(--text-muted)";
+    domainIndicator.style.background = dColor.replace("var(--", "rgba(").replace(")", ", 0.15)");
+    domainIndicator.style.color = dColor;
+    domainIndicator.style.borderLeft = "3px solid " + dColor;
+    domainIndicator.textContent = "D" + matchCurrentQ.domain + " " + DOMAIN_NAMES[matchCurrentQ.domain];
+    qTypeBadge.textContent = "TERM MATCH";
+    questionText.textContent = matchCurrentQ.q;
+
+    progressText.textContent = "Round " + (matchRound + 1) + " / " + gameQuestions.length;
+    progressFill.style.width = (((matchRound + 1) / gameQuestions.length) * 100) + "%";
+
+    // Timer off
+    timerText.classList.add("hidden");
+    timerBar.classList.add("hidden");
+
+    // Build terms and definitions
+    var pairs = matchCurrentQ.pairs;
+    var shuffledTerms = shuffle(pairs.map(function(p, i) { return {text: p.term, idx: i}; }));
+    var shuffledDefs = shuffle(pairs.map(function(p, i) { return {text: p.def, idx: i}; }));
+
+    matchTermsEl.textContent = "";
+    matchDefsEl.textContent = "";
+
+    shuffledTerms.forEach(function(t) {
+      var el = document.createElement("div");
+      el.className = "match-item";
+      el.setAttribute("data-pair-idx", t.idx);
+      el.setAttribute("data-type", "term");
+      el.textContent = t.text;
+      el.addEventListener("click", function() { handleMatchClick(el, "term"); });
+      matchTermsEl.appendChild(el);
+    });
+
+    shuffledDefs.forEach(function(d) {
+      var el = document.createElement("div");
+      el.className = "match-item";
+      el.setAttribute("data-pair-idx", d.idx);
+      el.setAttribute("data-type", "def");
+      el.textContent = d.text;
+      el.addEventListener("click", function() { handleMatchClick(el, "def"); });
+      matchDefsEl.appendChild(el);
+    });
+  }
+
+  function handleMatchClick(el, type) {
+    if (el.classList.contains("matched")) return;
+
+    if (type === "term") {
+      // Deselect previous term
+      matchTermsEl.querySelectorAll(".match-item").forEach(function(t) { t.classList.remove("selected"); });
+      el.classList.add("selected");
+      matchSelectedTerm = el;
+    } else if (type === "def" && matchSelectedTerm) {
+      var termIdx = parseInt(matchSelectedTerm.getAttribute("data-pair-idx"), 10);
+      var defIdx = parseInt(el.getAttribute("data-pair-idx"), 10);
+
+      matchPairCount++;
+
+      if (termIdx === defIdx) {
+        // Correct match
+        matchCorrectPairs++;
+        var pairNum = matchCorrectPairs;
+
+        var numBadgeTerm = document.createElement("span");
+        numBadgeTerm.className = "match-pair-num";
+        numBadgeTerm.textContent = pairNum;
+
+        var numBadgeDef = document.createElement("span");
+        numBadgeDef.className = "match-pair-num";
+        numBadgeDef.textContent = pairNum;
+
+        matchSelectedTerm.classList.remove("selected");
+        matchSelectedTerm.classList.add("matched");
+        matchSelectedTerm.insertBefore(numBadgeTerm, matchSelectedTerm.firstChild);
+        el.classList.add("matched");
+        el.insertBefore(numBadgeDef, el.firstChild);
+
+        soundMatchCorrect();
+        matchSelectedTerm = null;
+
+        // Check if all matched
+        if (matchCorrectPairs === matchCurrentQ.pairs.length) {
+          finishMatchRound(true);
+        }
+      } else {
+        // Wrong match
+        el.classList.add("wrong");
+        matchSelectedTerm.classList.add("wrong");
+        soundMatchWrong();
+        var termEl = matchSelectedTerm;
+        matchSelectedTerm = null;
+        setTimeout(function() {
+          el.classList.remove("wrong");
+          termEl.classList.remove("wrong", "selected");
+        }, 600);
+      }
+    }
+  }
+
+  function finishMatchRound(allCorrect) {
+    var q = matchCurrentQ;
+    roundTotal++;
+    roundDomainScores[q.domain].t++;
+    stats.totalAnswered++;
+    stats.domainScores[q.domain].t++;
+
+    if (matchPairCount === matchCurrentQ.pairs.length && allCorrect) {
+      // Perfect round — all matched with no mistakes
+      roundCorrect++;
+      roundDomainScores[q.domain].c++;
+      stats.totalCorrect++;
+      stats.domainScores[q.domain].c++;
+      stats.streak++;
+      if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
+      addXP(30);
+      showFeedback(true, q.explain);
+    } else {
+      // Had mistakes — count as incorrect for accuracy
+      stats.streak = 0;
+      var xpEarned = Math.max(10, 30 - (matchPairCount - matchCurrentQ.pairs.length) * 5);
+      addXP(xpEarned);
+      showFeedback(false, "Matched all pairs, but with mistakes. " + q.explain);
+    }
+
+    saveStats(stats);
+    updateHUD();
+    nextBtn.classList.remove("hidden");
+    nextBtn.removeEventListener("click", matchNextHandler);
+    nextBtn.addEventListener("click", matchNextHandler);
+  }
+
+  function matchNextHandler() {
+    nextBtn.removeEventListener("click", matchNextHandler);
+    matchRound++;
+    if (matchRound >= gameQuestions.length) {
+      endGame();
+    } else {
+      startMatchRound();
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  END GAME / RESULTS
+  // ════════════════════════════════════════════
+
+  function endGame() {
+    clearTimer();
+    gameArea.classList.remove("active");
+    resultsScreen.classList.add("active");
+    $id("statsSection").style.display = "block";
+
+    var pct = roundTotal > 0 ? Math.round((roundCorrect / roundTotal) * 100) : 0;
+
+    $id("resultsScore").textContent = pct + "%";
+    var subText = roundCorrect + " of " + roundTotal + " correct";
+    if (currentMode === "survival") {
+      subText += " (Survived " + roundTotal + " questions)";
+    }
+    $id("resultsSubtitle").textContent = subText;
+
+    // Stats cards
+    var statsContainer = $id("resultsStats");
+    statsContainer.textContent = "";
+
+    var statItems = [
+      {label: "XP Earned", value: "+" + roundXP, color: "var(--green)"},
+      {label: "Accuracy", value: pct + "%", color: pct >= 80 ? "var(--green)" : pct >= 60 ? "var(--yellow)" : "var(--red)"},
+      {label: "Current Streak", value: stats.streak, color: stats.streak >= 3 ? "var(--orange)" : "var(--text-primary)"},
+      {label: "Level", value: stats.level, color: "var(--green)"}
+    ];
+
+    statItems.forEach(function(item) {
+      var card = document.createElement("div");
+      card.className = "stat-card";
+
+      var val = document.createElement("div");
+      val.className = "stat-value";
+      val.style.color = item.color;
+      val.textContent = item.value;
+
+      var lbl = document.createElement("div");
+      lbl.className = "stat-label";
+      lbl.textContent = item.label;
+
+      card.appendChild(val);
+      card.appendChild(lbl);
+      statsContainer.appendChild(card);
+    });
+
+    // Domain bars
+    var domainBars = $id("resultsDomainBars");
+    domainBars.textContent = "";
+
+    for (var d = 1; d <= 6; d++) {
+      if (roundDomainScores[d] && roundDomainScores[d].t > 0) {
+        var row = document.createElement("div");
+        row.className = "results-domain-row";
+
+        var label = document.createElement("span");
+        label.className = "results-domain-label";
+        label.textContent = "D" + d + ": " + DOMAIN_NAMES[d];
+
+        var barWrap = document.createElement("div");
+        barWrap.className = "results-domain-bar";
+        var fill = document.createElement("div");
+        fill.className = "fill";
+        var domPct = Math.round((roundDomainScores[d].c / roundDomainScores[d].t) * 100);
+        fill.style.width = "0%";
+        fill.style.background = DOMAIN_COLORS[d];
+        barWrap.appendChild(fill);
+
+        var pctLabel = document.createElement("span");
+        pctLabel.className = "results-domain-pct";
+        pctLabel.style.color = DOMAIN_COLORS[d];
+        pctLabel.textContent = domPct + "%";
+
+        row.appendChild(label);
+        row.appendChild(barWrap);
+        row.appendChild(pctLabel);
+        domainBars.appendChild(row);
+
+        // Animate
+        (function(f, w) {
+          setTimeout(function() { f.style.width = w + "%"; }, 100);
+        })(fill, domPct);
+      }
+    }
+
+    renderLifetimeStats();
+  }
+
+  // ════════════════════════════════════════════
+  //  LIFETIME STATS
+  // ════════════════════════════════════════════
+
+  function renderLifetimeStats() {
+    var container = $id("lifetimeStats");
+    container.textContent = "";
+
+    var allTimePct = stats.totalAnswered > 0 ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0;
+
+    var items = [
+      {label: "Total Answered", value: stats.totalAnswered},
+      {label: "Total Correct", value: stats.totalCorrect},
+      {label: "Accuracy", value: allTimePct + "%"},
+      {label: "Best Streak", value: stats.bestStreak},
+      {label: "Level", value: stats.level},
+      {label: "Total XP", value: stats.xp}
+    ];
+
+    items.forEach(function(item) {
+      var card = document.createElement("div");
+      card.className = "stat-card";
+
+      var val = document.createElement("div");
+      val.className = "stat-value";
+      val.textContent = item.value;
+
+      var lbl = document.createElement("div");
+      lbl.className = "stat-label";
+      lbl.textContent = item.label;
+
+      card.appendChild(val);
+      card.appendChild(lbl);
+      container.appendChild(card);
+    });
+
+    // Domain mastery
+    var masteryGrid = $id("masteryGrid");
+    masteryGrid.textContent = "";
+
+    for (var d = 1; d <= 6; d++) {
+      var ds = stats.domainScores[d];
+      var pct = ds.t > 0 ? Math.round((ds.c / ds.t) * 100) : 0;
+
+      var card = document.createElement("div");
+      card.className = "mastery-card";
+
+      var header = document.createElement("div");
+      header.className = "mastery-card-header";
+
+      var label = document.createElement("span");
+      label.className = "mastery-card-label";
+      label.textContent = "D" + d + ": " + DOMAIN_NAMES[d];
+
+      var pctEl = document.createElement("span");
+      pctEl.className = "mastery-card-pct";
+      pctEl.style.color = DOMAIN_COLORS[d];
+      pctEl.textContent = pct + "%";
+
+      header.appendChild(label);
+      header.appendChild(pctEl);
+
+      var bar = document.createElement("div");
+      bar.className = "progress-bar";
+      var fill = document.createElement("div");
+      fill.className = "fill";
+      fill.style.width = pct + "%";
+      fill.style.background = DOMAIN_COLORS[d];
+      bar.appendChild(fill);
+
+      var detail = document.createElement("div");
+      detail.className = "mastery-card-detail";
+      detail.textContent = ds.c + " / " + ds.t + " correct";
+
+      card.appendChild(header);
+      card.appendChild(bar);
+      card.appendChild(detail);
+      masteryGrid.appendChild(card);
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  NAV BUTTONS
+  // ════════════════════════════════════════════
+
+  $id("playAgainBtn").addEventListener("click", function() {
+    resultsScreen.classList.remove("active");
+    startGame();
+  });
+
+  $id("backToModesBtn").addEventListener("click", function() {
+    resultsScreen.classList.remove("active");
+    gameArea.classList.remove("active");
+    homeScreen.style.display = "block";
+    $id("statsSection").style.display = "block";
+    renderLifetimeStats();
+  });
+
+  $id("resetBtn").addEventListener("click", function() {
+    if (confirm("Reset all game progress? This cannot be undone.")) {
+      stats = defaultStats();
+      saveStats(stats);
+      updateHUD();
+      renderLifetimeStats();
+    }
+  });
+
+  // ════════════════════════════════════════════
+  //  INIT
+  // ════════════════════════════════════════════
+
+  updateHUD();
+  renderLifetimeStats();
+
+})();
+</script>
+</body>
+</html>
