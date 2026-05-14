@@ -507,6 +507,7 @@
     <a href="course.html" class="active">Course</a>
     <a href="game.html">Game</a>
     <a href="exam.html">Exams</a>
+    <button class="bionic-toggle" id="bionicToggle" title="Toggle Bionic Reading">BIO</button>
   </div>
 </nav>
 
@@ -3210,6 +3211,74 @@ Protection rules:
   // ── Initial render ──
   renderProgress();
 
+})();
+</script>
+
+<script>
+// ── Bionic Reading ──
+(function() {
+  var BIONIC_KEY = 'gh600_bionic_enabled';
+  var btn = document.getElementById('bionicToggle');
+  var originalNodes = new Map();
+  var bionicActive = false;
+
+  function bionicWord(word) {
+    if (word.length <= 1) return word;
+    var mid = Math.ceil(word.length / 2);
+    return '<span class="bionic-bold">' + word.slice(0, mid) + '</span><span class="bionic-unbold">' + word.slice(mid) + '</span>';
+  }
+
+  function bionicText(text) {
+    return text.replace(/\S+/g, function(word) {
+      if (word.charAt(0) === '&' && word.indexOf(';') !== -1) return word;
+      return bionicWord(word);
+    });
+  }
+
+  function getContentNodes() {
+    var selectors = '.course-content p, .course-content li, .course-content td, .course-content .question-text, .course-content .explanation, .course-content .callout p, .course-content .card-title, .container p, .container li, .container td, .container-wide p, .container-wide li';
+    return document.querySelectorAll(selectors);
+  }
+
+  function applyBionic() {
+    var nodes = getContentNodes();
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (el.closest('pre') || el.closest('code') || el.closest('nav') || el.closest('.top-nav') || el.closest('button') || el.tagName === 'BUTTON') continue;
+      if (!originalNodes.has(el)) {
+        originalNodes.set(el, el.innerHTML);
+      }
+      el.innerHTML = bionicText(originalNodes.get(el));
+    }
+  }
+
+  function removeBionic() {
+    originalNodes.forEach(function(html, el) {
+      el.innerHTML = html;
+    });
+    originalNodes.clear();
+  }
+
+  function toggle() {
+    bionicActive = !bionicActive;
+    if (bionicActive) {
+      btn.classList.add('active');
+      applyBionic();
+    } else {
+      btn.classList.remove('active');
+      removeBionic();
+    }
+    try { localStorage.setItem(BIONIC_KEY, bionicActive ? '1' : '0'); } catch(e) {}
+  }
+
+  btn.addEventListener('click', toggle);
+
+  try {
+    if (localStorage.getItem(BIONIC_KEY) === '1') {
+      bionicActive = false;
+      toggle();
+    }
+  } catch(e) {}
 })();
 </script>
 

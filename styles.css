@@ -11,7 +11,7 @@
   --green-dim: #00cc33;
   --green-glow: rgba(0, 255, 65, 0.15);
   --green-glow-strong: rgba(0, 255, 65, 0.3);
-  --text-primary: #e0e0e8;
+  --text-primary: #FFB86C;
   --text-secondary: #8888a0;
   --text-muted: #555570;
   --red: #ff4444;
@@ -816,4 +816,47 @@ tr:hover td { background: var(--bg-card); }
   );
   pointer-events: none;
   z-index: 9999;
+}
+
+/* ── Bionic Reading Toggle ── */
+.bionic-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  border: 1px solid var(--green-dim);
+  background: transparent;
+  color: var(--green-dim);
+  transition: all var(--transition);
+  letter-spacing: 0.5px;
+  margin-left: 0.5rem;
+}
+
+.bionic-toggle:hover {
+  color: var(--green);
+  border-color: var(--green);
+  background: var(--green-glow);
+}
+
+.bionic-toggle.active {
+  background: var(--green);
+  color: var(--bg-primary);
+  border-color: var(--green);
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+/* Bionic bold styling */
+.bionic-bold {
+  font-weight: 700;
+  opacity: 1;
+}
+
+.bionic-unbold {
+  font-weight: 400;
+  opacity: 0.8;
 }
