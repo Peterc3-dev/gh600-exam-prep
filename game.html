@@ -2182,6 +2182,19 @@
 
   btn.addEventListener('click', toggle);
 
+  window._bionicRefresh = function() {
+    if (bionicActive) {
+      applyBionic();
+    }
+  };
+
+  var observer = new MutationObserver(function() {
+    if (bionicActive) {
+      applyBionic();
+    }
+  });
+  observer.observe(document.querySelector('.container'), { childList: true, subtree: true, characterData: true });
+
   try {
     if (localStorage.getItem(BIONIC_KEY) === '1') {
       bionicActive = false;

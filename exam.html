@@ -3467,6 +3467,16 @@ show("select");
 
   btn.addEventListener('click', toggle);
 
+  var container = document.querySelector('.container') || document.querySelector('.container-wide');
+  if (container) {
+    var observer = new MutationObserver(function() {
+      if (bionicActive) {
+        applyBionic();
+      }
+    });
+    observer.observe(container, { childList: true, subtree: true, characterData: true });
+  }
+
   try {
     if (localStorage.getItem(BIONIC_KEY) === '1') {
       bionicActive = false;
