@@ -3422,7 +3422,7 @@ show("select");
   }
 
   function getContentNodes() {
-    var selectors = '.container p, .container .question-text, .container .explanation, .container td, .container li, .container .card-title, .container-wide p, .container-wide .question-text, .container-wide td, .container-wide li, .exam-hero .subtitle, .exam-card .exam-desc, #screen-exam .question-text, #screen-exam .explanation, #screen-review .question-text, #screen-review .explanation';
+    var selectors = 'body p, body li, body td, body .question-text, body .explanation, body .exam-desc, body .subtitle, body .exam-card p, body .stat-card, body .review-q p';
     return document.querySelectorAll(selectors);
   }
 
