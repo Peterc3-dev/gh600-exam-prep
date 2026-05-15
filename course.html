@@ -3215,70 +3215,72 @@ Protection rules:
 </script>
 
 <script>
-// ── Bionic Reading ──
+// ── Bionic Reading (text-node walker) ──
 (function() {
   var BIONIC_KEY = 'gh600_bionic_enabled';
   var btn = document.getElementById('bionicToggle');
-  var originalNodes = new Map();
   var bionicActive = false;
 
-  function bionicWord(word) {
-    if (word.length <= 1) return word;
-    var mid = Math.ceil(word.length / 2);
-    return '<span class="bionic-bold">' + word.slice(0, mid) + '</span><span class="bionic-unbold">' + word.slice(mid) + '</span>';
-  }
-
-  function bionicText(text) {
-    return text.replace(/\S+/g, function(word) {
-      if (word.charAt(0) === '&' && word.indexOf(';') !== -1) return word;
-      return bionicWord(word);
-    });
-  }
-
-  function getContentNodes() {
-    var selectors = '.course-main p, .course-main li, .course-main td, .subsection p, .subsection li, .subsection td, .domain-section p, .domain-section li, .exam-tip p, .concept-box p, .warning-box p, .danger-box p, .compare-card li, .compare-card p, .container p, .container li, .container td';
-    return document.querySelectorAll(selectors);
-  }
-
-  function applyBionic() {
-    var nodes = getContentNodes();
-    for (var i = 0; i < nodes.length; i++) {
-      var el = nodes[i];
-      if (el.closest('pre') || el.closest('code') || el.closest('nav') || el.closest('.top-nav') || el.closest('button') || el.tagName === 'BUTTON') continue;
-      if (!originalNodes.has(el)) {
-        originalNodes.set(el, el.innerHTML);
-      }
-      el.innerHTML = bionicText(originalNodes.get(el));
+  function walkTextNodes(el, cb) {
+    if (el.nodeType === 3) { cb(el); return; }
+    if (el.tagName === 'PRE' || el.tagName === 'CODE' || el.tagName === 'BUTTON' || el.tagName === 'NAV') return;
+    for (var i = 0; i < el.childNodes.length; i++) {
+      walkTextNodes(el.childNodes[i], cb);
     }
   }
 
-  function removeBionic() {
-    originalNodes.forEach(function(html, el) {
-      el.innerHTML = html;
+  function bionicifyTextNode(node) {
+    var text = node.textContent;
+    if (!text.trim()) return;
+    var frag = document.createDocumentFragment();
+    var parts = text.split(/(\s+)/);
+    for (var i = 0; i < parts.length; i++) {
+      var word = parts[i];
+      if (!word.trim() || word.length <= 1) {
+        frag.appendChild(document.createTextNode(word));
+        continue;
+      }
+      var mid = Math.ceil(word.length / 2);
+      var b = document.createElement('span');
+      b.className = 'bionic-bold';
+      b.textContent = word.slice(0, mid);
+      var u = document.createElement('span');
+      u.className = 'bionic-unbold';
+      u.textContent = word.slice(mid);
+      frag.appendChild(b);
+      frag.appendChild(u);
+    }
+    node.parentNode.replaceChild(frag, node);
+  }
+
+  function applyBionic() {
+    document.body.classList.add('bionic-on');
+    var els = document.querySelectorAll('.course-main p, .course-main li, .course-main td, .subsection p, .subsection li, .subsection td, .exam-tip p, .concept-box p, .warning-box p, .danger-box p, .compare-card li, .compare-card p');
+    els.forEach(function(el) {
+      if (el.closest('pre') || el.closest('code') || el.closest('nav') || el.closest('button')) return;
+      if (el.dataset.bionicOriginal) return;
+      el.dataset.bionicOriginal = el.innerHTML;
+      walkTextNodes(el, bionicifyTextNode);
     });
-    originalNodes.clear();
+  }
+
+  function removeBionic() {
+    document.body.classList.remove('bionic-on');
+    document.querySelectorAll('[data-bionic-original]').forEach(function(el) {
+      el.innerHTML = el.dataset.bionicOriginal;
+      delete el.dataset.bionicOriginal;
+    });
   }
 
   function toggle() {
     bionicActive = !bionicActive;
-    if (bionicActive) {
-      btn.classList.add('active');
-      applyBionic();
-    } else {
-      btn.classList.remove('active');
-      removeBionic();
-    }
+    if (bionicActive) { btn.classList.add('active'); applyBionic(); }
+    else { btn.classList.remove('active'); removeBionic(); }
     try { localStorage.setItem(BIONIC_KEY, bionicActive ? '1' : '0'); } catch(e) {}
   }
 
   btn.addEventListener('click', toggle);
-
-  try {
-    if (localStorage.getItem(BIONIC_KEY) === '1') {
-      bionicActive = false;
-      toggle();
-    }
-  } catch(e) {}
+  try { if (localStorage.getItem(BIONIC_KEY) === '1') { bionicActive = false; toggle(); } } catch(e) {}
 })();
 </script>
 
