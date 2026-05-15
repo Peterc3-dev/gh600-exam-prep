@@ -852,11 +852,11 @@ tr:hover td { background: var(--bg-card); }
 
 /* Bionic bold styling */
 .bionic-bold {
-  font-weight: 800;
-  color: #ffe0a0;
+  font-weight: 600;
+  color: #FFB86C;
 }
 
 .bionic-unbold {
-  font-weight: 300;
-  color: #9a7a40;
+  font-weight: 400;
+  color: #c99550;
 }
