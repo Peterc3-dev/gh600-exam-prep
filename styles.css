@@ -853,10 +853,9 @@ tr:hover td { background: var(--bg-card); }
 /* Bionic bold styling */
 .bionic-bold {
   font-weight: 600;
-  color: #FFB86C;
 }
 
 .bionic-unbold {
   font-weight: 400;
-  color: #c99550;
+  opacity: 0.7;
 }
